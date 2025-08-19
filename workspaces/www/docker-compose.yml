@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  static-server:
+    image: node:20-alpine
+    container_name: www-static-server
+    working_dir: /app
+    volumes:
+      - ./public:/app/public:ro
+      - ./package.json:/app/package.json:ro
+    command: sh -c "npm install -g http-server && http-server public -p 3000 --cors -c-1"
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      # HTTP router (will redirect to HTTPS automatically)
+      - "traefik.http.routers.static-server.rule=Host(`etdofresh-dev.duckdns.org`) || Host(`www.etdofresh-dev.duckdns.org`)"
+      - "traefik.http.routers.static-server.entrypoints=web"
+      # HTTPS router
+      - "traefik.http.routers.static-server-secure.rule=Host(`etdofresh-dev.duckdns.org`) || Host(`www.etdofresh-dev.duckdns.org`)"
+      - "traefik.http.routers.static-server-secure.entrypoints=websecure"
+      - "traefik.http.routers.static-server-secure.tls=true"
+      - "traefik.http.routers.static-server-secure.tls.certresolver=letsencrypt"
+      # Service configuration
+      - "traefik.http.services.static-server.loadbalancer.server.port=3000"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
+networks:
+  traefik-network:
+    external: true
