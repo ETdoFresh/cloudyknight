@@ -9,6 +9,7 @@ minio_data/
 .env
 .env.local
 .env.backup
+.env.multi-backup
 
 # Logs
 *.log

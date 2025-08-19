@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Multi-Destination MinIO Backup Service
+  minio-multi-backup:
+    image: minio/mc:latest
+    container_name: workspace-minio-multi-backup
+    networks:
+      - traefik-network
+    environment:
+      # Local MinIO Configuration
+      LOCAL_MINIO_ENDPOINT: http://minio:9000
+      LOCAL_MINIO_USER: ${MINIO_ROOT_USER:-minioadmin}
+      LOCAL_MINIO_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      
+      # Destination 1: Remote MinIO
+      REMOTE1_ENDPOINT: ${REMOTE1_ENDPOINT}
+      REMOTE1_ACCESS_KEY: ${REMOTE1_ACCESS_KEY}
+      REMOTE1_SECRET_KEY: ${REMOTE1_SECRET_KEY}
+      REMOTE1_NAME: ${REMOTE1_NAME:-MinIO Remote}
+      REMOTE1_ENABLED: ${REMOTE1_ENABLED:-true}
+      
+      # Destination 2: Cloudflare R2
+      REMOTE2_ENDPOINT: ${REMOTE2_ENDPOINT}
+      REMOTE2_ACCESS_KEY: ${REMOTE2_ACCESS_KEY}
+      REMOTE2_SECRET_KEY: ${REMOTE2_SECRET_KEY}
+      REMOTE2_NAME: ${REMOTE2_NAME:-Cloudflare R2}
+      REMOTE2_ENABLED: ${REMOTE2_ENABLED:-true}
+      
+      # Backup Configuration
+      BUCKET_NAME: workspaces
+      BACKUP_MODE: ${BACKUP_MODE:-mirror}
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-3600}
+      PARALLEL_BACKUP: ${PARALLEL_BACKUP:-true}
+      
+    volumes:
+      - ./scripts/backup-multi-destination.sh:/backup-multi.sh:ro
+      - ./scripts/multi-backup-entrypoint.sh:/entrypoint.sh:ro
+      - multi_backup_logs:/var/log
+    
+    entrypoint: /bin/sh
+    command: /entrypoint.sh
+    
+    restart: unless-stopped
+    
+    labels:
+      - "com.docker.compose.project=minio-multi-backup"
+      - "backup.type=multi-destination"
+      - "backup.destinations=${REMOTE1_NAME},${REMOTE2_NAME}"
+
+volumes:
+  multi_backup_logs:
+    driver: local
+
+networks:
+  traefik-network:
+    external: true
