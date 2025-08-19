@@ -3,7 +3,7 @@
 # Read JSON input from stdin
 input=$(cat)
 
-# Extract values using jq
+# Extract values from JSON
 MODEL_DISPLAY=$(echo "$input" | jq -r '.model.display_name')
 MODEL_ID=$(echo "$input" | jq -r '.model.id')
 CURRENT_DIR=$(echo "$input" | jq -r '.workspace.current_dir')
@@ -118,5 +118,12 @@ case "$MODEL_ID" in
         ;;
 esac
 
+# Output style indicator
+if [ "$OUTPUT_STYLE" != "null" ] && [ -n "$OUTPUT_STYLE" ]; then
+    STYLE_INFO=" | \033[95m✏️ ${OUTPUT_STYLE}\033[0m"
+else
+    STYLE_INFO=""
+fi
+
 # Build the status line
-echo -e "📁 \033[36m${DIR_NAME}\033[0m${GIT_INFO}${VENV_INFO}${NODE_INFO}${DOCKER_INFO}${MEM_INFO} | \033[90m🕐 ${TIME}\033[0m | ${MODEL_COLOR}🧠 ${MODEL_DISPLAY}\033[0m"
+echo -e "📁 \033[36m${DIR_NAME}\033[0m${GIT_INFO}${VENV_INFO}${NODE_INFO}${DOCKER_INFO}${MEM_INFO}${STYLE_INFO} | \033[90m🕐 ${TIME}\033[0m | ${MODEL_COLOR}🧠 ${MODEL_DISPLAY}\033[0m"
