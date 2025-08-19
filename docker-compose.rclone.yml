@@ -23,6 +23,25 @@ services:
       timeout: 10s
       retries: 3
 
+  # MinIO initialization - Enables versioning and configures buckets
+  minio-init:
+    image: minio/mc:latest
+    container_name: workspace-minio-init
+    networks:
+      - traefik-network
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      BUCKET_NAME: workspaces
+    volumes:
+      - ./scripts/init-minio.sh:/init-minio.sh:ro
+    command: /bin/sh /init-minio.sh
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"  # Run once and exit
+
   # RClone mount - Better performance than s3fs
   rclone-mount:
     image: rclone/rclone:latest
@@ -60,6 +79,8 @@ services:
     depends_on:
       minio:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   # Sync service - uploads local workspaces to S3 with filtering

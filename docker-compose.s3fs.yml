@@ -18,6 +18,24 @@ services:
       - traefik-network
     restart: unless-stopped
 
+  # MinIO initialization - Enables versioning and configures buckets
+  minio-init:
+    image: minio/mc:latest
+    container_name: workspace-minio-init
+    networks:
+      - traefik-network
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      BUCKET_NAME: workspaces
+    volumes:
+      - ./scripts/init-minio.sh:/init-minio.sh:ro
+    command: /bin/sh /init-minio.sh
+    depends_on:
+      - minio
+    restart: "no"  # Run once and exit
+
   # S3FS Mounter - mounts S3 bucket as filesystem
   s3fs-mounter:
     image: efrecon/s3fs:latest
@@ -45,6 +63,7 @@ services:
       - traefik-network
     depends_on:
       - minio
+      - minio-init
     restart: unless-stopped
 
   # Modified monitor that uses the S3-mounted filesystem
