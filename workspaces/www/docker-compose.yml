@@ -1,33 +1,29 @@
 version: '3.8'
-
 services:
-  static-server:
-    image: node:20-alpine
-    container_name: www-static-server
-    working_dir: /app
-    volumes:
-      - ./public:/app/public:ro
-      - ./package.json:/app/package.json:ro
-    command: sh -c "npm install -g http-server && http-server public -p 3000 --cors -c-1"
+  www:
+    container_name: workspace-www
     networks:
       - traefik-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-network"
-      # HTTP router (will redirect to HTTPS automatically)
-      - "traefik.http.routers.static-server.rule=Host(`etdofresh-dev.duckdns.org`) || Host(`www.etdofresh-dev.duckdns.org`)"
-      - "traefik.http.routers.static-server.entrypoints=web"
-      # HTTPS router
-      - "traefik.http.routers.static-server-secure.rule=Host(`etdofresh-dev.duckdns.org`) || Host(`www.etdofresh-dev.duckdns.org`)"
-      - "traefik.http.routers.static-server-secure.entrypoints=websecure"
-      - "traefik.http.routers.static-server-secure.tls=true"
-      - "traefik.http.routers.static-server-secure.tls.certresolver=letsencrypt"
-      # Service configuration
-      - "traefik.http.services.static-server.loadbalancer.server.port=3000"
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      - traefik.http.routers.workspace-www.rule=Host(`etdofresh-dev.duckdns.org`) && (Path(`/`) || PathRegexp(`^/[^/]+\\.[^/]+$$`))
+      - traefik.http.routers.workspace-www.entrypoints=web
+      - traefik.http.routers.workspace-www-secure.rule=Host(`etdofresh-dev.duckdns.org`) && (Path(`/`) || PathRegexp(`^/[^/]+\\.[^/]+$$`))
+      - traefik.http.routers.workspace-www-secure.entrypoints=websecure
+      - traefik.http.routers.workspace-www-secure.tls=true
+      - traefik.http.routers.workspace-www-secure.tls.certresolver=letsencrypt
+      - traefik.http.services.workspace-www.loadbalancer.server.port=3000
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - /home/claude/cloudyknight/workspaces/www/public:/app/public:ro
+      - /home/claude/cloudyknight/workspaces/www/package.json:/app/package.json:ro
+    command: sh -c "npm install -g http-server && http-server public -p 3000 --cors -c-1"
     environment:
-      - NODE_ENV=production
-
+      NODE_ENV: production
+      PORT: 3000
 networks:
   traefik-network:
     external: true

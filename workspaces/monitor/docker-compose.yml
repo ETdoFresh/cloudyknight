@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  monitor:
+    build: .
+    container_name: workspace-monitor
+    volumes:
+      # Mount the entire workspaces directory
+      - /home/claude/cloudyknight/workspaces:/workspaces:rw
+      # Mount Docker socket to manage containers
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      # Mount logs directory
+      - ./logs:/var/log:rw
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - WORKSPACE_PATH=/workspaces
+      - DOMAIN=etdofresh-dev.duckdns.org
+      - NETWORK=traefik-network
+      - WEB_PORT=4000
+      - SCAN_INTERVAL=30000
+    ports:
+      - "4000:4000"  # Expose dashboard port for local access
+    networks:
+      - traefik-network
+    restart: unless-stopped
+    labels:
+      # Enable Traefik
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      # HTTP router (will redirect to HTTPS)
+      - "traefik.http.routers.monitor.rule=Host(`etdofresh-dev.duckdns.org`) && PathPrefix(`/monitor`)"
+      - "traefik.http.routers.monitor.entrypoints=web"
+      # HTTPS router
+      - "traefik.http.routers.monitor-secure.rule=Host(`etdofresh-dev.duckdns.org`) && PathPrefix(`/monitor`)"
+      - "traefik.http.routers.monitor-secure.entrypoints=websecure"
+      - "traefik.http.routers.monitor-secure.tls=true"
+      - "traefik.http.routers.monitor-secure.tls.certresolver=letsencrypt"
+      # Strip prefix middleware
+      - "traefik.http.middlewares.monitor-strip.stripprefix.prefixes=/monitor"
+      - "traefik.http.routers.monitor-secure.middlewares=monitor-strip"
+      # Service configuration
+      - "traefik.http.services.monitor.loadbalancer.server.port=4000"
+
+networks:
+  traefik-network:
+    external: true
