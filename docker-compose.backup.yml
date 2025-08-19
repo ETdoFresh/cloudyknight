@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # MinIO Backup Service - Periodic backup to remote MinIO
+  minio-backup:
+    image: minio/mc:latest
+    container_name: workspace-minio-backup
+    networks:
+      - traefik-network
+    environment:
+      # Local MinIO Configuration
+      LOCAL_MINIO_ENDPOINT: http://minio:9000
+      LOCAL_MINIO_USER: ${MINIO_ROOT_USER:-minioadmin}
+      LOCAL_MINIO_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      
+      # Remote MinIO Configuration
+      REMOTE_MINIO_ENDPOINT: ${REMOTE_MINIO_ENDPOINT:-https://minio.etdofresh.com}
+      REMOTE_MINIO_USER: ${REMOTE_MINIO_USER}
+      REMOTE_MINIO_PASSWORD: ${REMOTE_MINIO_PASSWORD}
+      
+      # Backup Configuration
+      BUCKET_NAME: workspaces
+      BACKUP_MODE: ${BACKUP_MODE:-mirror}
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-3600}  # Default: 1 hour
+      
+    volumes:
+      - ./scripts/backup-minio.sh:/backup-minio.sh:ro
+      - ./scripts/backup-entrypoint.sh:/entrypoint.sh:ro
+      - backup_logs:/var/log
+    
+    entrypoint: /bin/sh
+    command: /entrypoint.sh
+    
+    # depends_on:
+    #   minio:
+    #     condition: service_healthy
+    
+    restart: unless-stopped
+    
+    labels:
+      - "com.docker.compose.project=minio-backup"
+      - "backup.type=scheduled"
+      - "backup.destination=${REMOTE_MINIO_ENDPOINT}"
+
+  # Alternative: Continuous real-time backup with file watching
+  minio-backup-watch:
+    image: minio/mc:latest
+    container_name: workspace-minio-backup-watch
+    networks:
+      - traefik-network
+    profiles:
+      - backup-watch  # Only start if explicitly requested
+    environment:
+      LOCAL_MINIO_ENDPOINT: http://minio:9000
+      LOCAL_MINIO_USER: ${MINIO_ROOT_USER:-minioadmin}
+      LOCAL_MINIO_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      REMOTE_MINIO_ENDPOINT: ${REMOTE_MINIO_ENDPOINT:-https://minio.etdofresh.com}
+      REMOTE_MINIO_USER: ${REMOTE_MINIO_USER}
+      REMOTE_MINIO_PASSWORD: ${REMOTE_MINIO_PASSWORD}
+      BUCKET_NAME: workspaces
+    volumes:
+      - ./scripts/backup-minio.sh:/backup-minio.sh:ro
+    command: |
+      sh -c "
+        # Configure aliases
+        mc alias set local-minio http://minio:9000 $$LOCAL_MINIO_USER $$LOCAL_MINIO_PASSWORD
+        mc alias set remote-minio $$REMOTE_MINIO_ENDPOINT $$REMOTE_MINIO_USER $$REMOTE_MINIO_PASSWORD
+        
+        # Ensure remote bucket exists
+        mc mb -p remote-minio/$$BUCKET_NAME || true
+        mc version enable remote-minio/$$BUCKET_NAME || true
+        
+        # Start continuous mirror with watch
+        echo 'Starting continuous backup with file watching...'
+        mc mirror --watch \
+          --overwrite \
+          --preserve \
+          --exclude '*.tmp' \
+          --exclude '.DS_Store' \
+          local-minio/$$BUCKET_NAME \
+          remote-minio/$$BUCKET_NAME
+      "
+    # depends_on:
+    #   minio:
+    #     condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  backup_logs:
+    driver: local
+
+networks:
+  traefik-network:
+    external: true
