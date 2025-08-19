@@ -1,5 +1,6 @@
 # Workspaces are stored in S3, not git
 /workspaces/
+workspaces/
 
 # MinIO data
 minio_data/
