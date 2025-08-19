@@ -1,7 +1,7 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "./.claude/statusline/default.sh",
+    "command": "./.claude/statusline/ccusage.sh",
     "padding": 0
   }
 }
