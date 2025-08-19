@@ -1,0 +1,28 @@
+# Workspaces are stored in S3, not git
+/workspaces/
+
+# MinIO data
+minio_data/
+
+# Environment files
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+tmp/

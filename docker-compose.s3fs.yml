@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # MinIO for S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    container_name: workspace-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    networks:
+      - traefik-network
+    restart: unless-stopped
+
+  # S3FS Mounter - mounts S3 bucket as filesystem
+  s3fs-mounter:
+    image: efrecon/s3fs:latest
+    container_name: workspace-s3fs
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    environment:
+      AWS_S3_BUCKET: workspaces
+      AWS_S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+      AWS_S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      AWS_S3_URL: http://minio:9000
+      AWS_S3_MOUNT: /mnt/workspaces
+      UID: 1000
+      GID: 1000
+      # S3FS options for better performance and compatibility
+      S3FS_ARGS: "use_path_request_style,url=http://minio:9000,allow_other,use_cache=/tmp/s3fs-cache,max_stat_cache_size=100000,stat_cache_expire=900,retries=5,connect_timeout=10"
+    volumes:
+      # This is where S3 will be mounted
+      - s3_workspaces:/mnt/workspaces:shared
+      - s3fs_cache:/tmp/s3fs-cache
+    networks:
+      - traefik-network
+    depends_on:
+      - minio
+    restart: unless-stopped
+
+  # Modified monitor that uses the S3-mounted filesystem
+  monitor:
+    container_name: workspace-monitor-s3
+    build:
+      context: ./workspaces/monitor
+      dockerfile: Dockerfile
+    networks:
+      - traefik-network
+    volumes:
+      # Mount the S3FS volume instead of local filesystem
+      - s3_workspaces:/workspaces:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WORKSPACE_PATH: /workspaces
+      DOMAIN: ${DOMAIN:-etdofresh-dev.duckdns.org}
+      NETWORK: traefik-network
+      SCAN_INTERVAL: 30000
+      PORT: 4000
+      # S3 sync configuration
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: workspaces
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      - traefik.http.routers.workspace-monitor.rule=Host(`${DOMAIN}`) && PathPrefix(`/monitor`)
+      - traefik.http.routers.workspace-monitor.entrypoints=websecure
+      - traefik.http.routers.workspace-monitor.tls=true
+      - traefik.http.routers.workspace-monitor.tls.certresolver=letsencrypt
+      - traefik.http.services.workspace-monitor.loadbalancer.server.port=4000
+    depends_on:
+      - s3fs-mounter
+    restart: unless-stopped
+
+volumes:
+  minio_data:
+    driver: local
+  s3_workspaces:
+    driver: local
+  s3fs_cache:
+    driver: local
+
+networks:
+  traefik-network:
+    external: true

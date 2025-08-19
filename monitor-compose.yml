@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  monitor:
+    # Build the ephemeral monitor image
+    build:
+      context: ./workspaces/monitor/docker/node-ephemeral
+      dockerfile: Dockerfile
+    image: workspace-monitor-ephemeral:latest
+    container_name: workspace-monitor
+    networks:
+      - traefik-network
+    restart: unless-stopped
+    volumes:
+      # Mount monitor source from S3 (read-only)
+      - /workspaces/monitor:/workspace:ro
+      # Mount all workspaces for monitoring (read-only)
+      - /workspaces:/workspaces-to-monitor:ro
+      # Docker socket for container management
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WORKSPACE_PATH: /workspaces-to-monitor
+      DOMAIN: ${DOMAIN:-etdofresh-dev.duckdns.org}
+      NETWORK: traefik-network
+      SCAN_INTERVAL: 30000
+      PORT: 4000
+      NODE_ENV: production
+    command: ["node", "src/index.js"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      # Traefik configuration
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      # HTTP router
+      - traefik.http.routers.workspace-monitor.rule=Host(`${DOMAIN:-etdofresh-dev.duckdns.org}`) && PathPrefix(`/monitor`)
+      - traefik.http.routers.workspace-monitor.entrypoints=web
+      # HTTPS router
+      - traefik.http.routers.workspace-monitor-secure.rule=Host(`${DOMAIN:-etdofresh-dev.duckdns.org}`) && PathPrefix(`/monitor`)
+      - traefik.http.routers.workspace-monitor-secure.entrypoints=websecure
+      - traefik.http.routers.workspace-monitor-secure.tls=true
+      - traefik.http.routers.workspace-monitor-secure.tls.certresolver=letsencrypt
+      # Service
+      - traefik.http.services.workspace-monitor.loadbalancer.server.port=4000
+
+networks:
+  traefik-network:
+    external: true

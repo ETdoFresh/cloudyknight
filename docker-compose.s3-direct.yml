@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # MinIO for S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    container_name: workspace-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    networks:
+      - traefik-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RClone mount - Mounts S3 directly as /workspaces for local development
+  rclone-workspaces:
+    image: rclone/rclone:latest
+    container_name: workspace-rclone-direct
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    environment:
+      RCLONE_CONFIG_MINIO_TYPE: s3
+      RCLONE_CONFIG_MINIO_PROVIDER: Minio
+      RCLONE_CONFIG_MINIO_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+      RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      RCLONE_CONFIG_MINIO_ENDPOINT: http://minio:9000
+      RCLONE_CONFIG_MINIO_ENV_AUTH: "false"
+    command: |
+      mount minio:workspaces /workspaces
+      --vfs-cache-mode writes
+      --vfs-cache-max-size 500M
+      --vfs-cache-max-age 1h
+      --vfs-write-back 5s
+      --allow-other
+      --allow-non-empty
+      --dir-cache-time 1m
+      --poll-interval 15s
+      --umask 002
+      --exclude "node_modules/**"
+      --exclude ".git/**"
+      --exclude "*.log"
+      --exclude ".env*"
+      --exclude "dist/**"
+      --exclude "build/**"
+      --exclude "__pycache__/**"
+      --exclude "vendor/**"
+      --log-level INFO
+    volumes:
+      # Mount S3 directly to host's /workspaces (read-write)
+      - /workspaces:/workspaces:shared
+      - rclone_cache:/root/.cache/rclone
+    networks:
+      - traefik-network
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Monitor reads directly from S3-mounted /workspaces
+  monitor:
+    container_name: workspace-monitor
+    build:
+      context: ./workspaces/monitor
+      dockerfile: Dockerfile
+    networks:
+      - traefik-network
+    volumes:
+      # Use the S3-mounted workspaces (read-write for compose generation)
+      - /workspaces:/workspaces
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WORKSPACE_PATH: /workspaces
+      DOMAIN: ${DOMAIN:-etdofresh-dev.duckdns.org}
+      NETWORK: traefik-network
+      SCAN_INTERVAL: 30000
+      PORT: 4000
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      - traefik.http.routers.workspace-monitor.rule=Host(`${DOMAIN}`) && PathPrefix(`/monitor`)
+      - traefik.http.routers.workspace-monitor.entrypoints=websecure
+      - traefik.http.routers.workspace-monitor.tls=true
+      - traefik.http.routers.workspace-monitor.tls.certresolver=letsencrypt
+      - traefik.http.services.workspace-monitor.loadbalancer.server.port=4000
+    depends_on:
+      - rclone-workspaces
+    restart: unless-stopped
+
+volumes:
+  minio_data:
+    driver: local
+  rclone_cache:
+    driver: local
+
+networks:
+  traefik-network:
+    external: true
