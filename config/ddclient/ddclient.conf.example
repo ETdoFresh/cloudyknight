@@ -1,0 +1,20 @@
+# Namecheap Dynamic DNS Configuration
+# Rename this file to ddclient.conf and update with your credentials
+
+daemon=300                              # Update every 5 minutes
+syslog=yes
+pid=/var/run/ddclient/ddclient.pid
+ssl=yes
+
+# Namecheap configuration
+use=web, web=dynamicdns.park-your-domain.com/getip
+protocol=namecheap
+server=dynamicdns.park-your-domain.com
+login=etdofresh.com                    # Your domain
+password='YOUR_DDNS_PASSWORD'          # From Namecheap Advanced DNS settings
+
+# Update root domain
+@.etdofresh.com
+
+# Update subdomain (uncomment and modify as needed)
+# workspaces.etdofresh.com

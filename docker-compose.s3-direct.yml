@@ -79,8 +79,8 @@ services:
       --exclude "vendor/**"
       --log-level INFO
     volumes:
-      # Mount S3 directly to host's /workspaces (read-write)
-      - /workspaces:/workspaces:shared
+      # Mount the host's ./workspaces directory to container's /workspaces
+      - ./workspaces:/workspaces:shared
       - rclone_cache:/root/.cache/rclone
     networks:
       - traefik-network
@@ -91,21 +91,21 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
-  # Monitor reads directly from S3-mounted /workspaces
+  # Monitor reads directly from S3-mounted ./workspaces
   monitor:
     container_name: workspace-monitor
     build:
-      context: ./workspaces/monitor
+      context: ./monitor
       dockerfile: Dockerfile
     networks:
       - traefik-network
     volumes:
       # Use the S3-mounted workspaces (read-write for compose generation)
-      - /workspaces:/workspaces
+      - ./workspaces:/workspaces
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       WORKSPACE_PATH: /workspaces
-      DOMAIN: ${DOMAIN:-etdofresh-dev.duckdns.org}
+      DOMAIN: ${DOMAIN:-workspaces.etdofresh.com}
       NETWORK: traefik-network
       SCAN_INTERVAL: 30000
       PORT: 4000

@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-DOMAIN="${DOMAIN:-etdofresh-dev.duckdns.org}"
+DOMAIN="${DOMAIN:-workspaces.etdofresh.com}"
 MINIO_USER="${MINIO_ROOT_USER:-minioadmin}"
 MINIO_PASS="${MINIO_ROOT_PASSWORD:-minioadmin}"
 S3_ENDPOINT="${S3_ENDPOINT:-http://localhost:9000}"
@@ -47,18 +47,20 @@ echo -e "${GREEN}✅ Prerequisites checked${NC}"
 # Step 2: Create mount point
 echo -e "\n${GREEN}[2/6] Setting up mount point...${NC}"
 
-if [ -d "/workspaces" ]; then
-    echo -e "${YELLOW}⚠️  /workspaces already exists${NC}"
+WORKSPACE_DIR="$(pwd)/workspaces"
+
+if [ -d "$WORKSPACE_DIR" ]; then
+    echo -e "${YELLOW}⚠️  ./workspaces already exists${NC}"
     read -p "Clear and recreate? (y/n): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        sudo rm -rf /workspaces
-        sudo mkdir -p /workspaces
-        sudo chmod 777 /workspaces
+        rm -rf "$WORKSPACE_DIR"
+        mkdir -p "$WORKSPACE_DIR"
+        chmod 777 "$WORKSPACE_DIR"
     fi
 else
-    sudo mkdir -p /workspaces
-    sudo chmod 777 /workspaces
+    mkdir -p "$WORKSPACE_DIR"
+    chmod 777 "$WORKSPACE_DIR"
 fi
 
 echo -e "${GREEN}✅ Mount point ready${NC}"
@@ -66,7 +68,7 @@ echo -e "${GREEN}✅ Mount point ready${NC}"
 # Step 3: Start MinIO
 echo -e "\n${GREEN}[3/6] Starting MinIO S3 storage...${NC}"
 
-docker-compose -f docker-compose.s3-direct.yml up -d minio
+docker-compose -f docker-compose.production.yml up -d minio
 
 # Wait for MinIO to be ready
 echo "Waiting for MinIO to start..."
@@ -92,23 +94,25 @@ echo -e "${GREEN}✅ S3 bucket 'workspaces' ready${NC}"
 # Step 4: Start RClone mount
 echo -e "\n${GREEN}[4/6] Mounting S3 as filesystem...${NC}"
 
-docker-compose -f docker-compose.s3-direct.yml up -d rclone-workspaces
+docker-compose -f docker-compose.rclone-mount.yml up -d
 
 # Wait for mount to be ready
 echo "Waiting for S3 mount..."
 sleep 5
 
 # Verify mount is working
-if mountpoint -q /workspaces; then
-    echo -e "${GREEN}✅ S3 mounted at /workspaces${NC}"
-else
-    echo -e "${YELLOW}⚠️  Mount verification failed, checking alternative...${NC}"
-    if [ -d "/workspaces" ] && docker ps | grep -q rclone; then
-        echo -e "${GREEN}✅ Mount appears to be working${NC}"
+if [ -d "$WORKSPACE_DIR" ] && docker ps | grep -q rclone; then
+    echo -e "${GREEN}✅ S3 mounted at ./workspaces${NC}"
+    # Quick test write
+    if touch "$WORKSPACE_DIR/.mount-test" 2>/dev/null; then
+        rm "$WORKSPACE_DIR/.mount-test"
+        echo -e "${GREEN}✅ Mount is writable${NC}"
     else
-        echo -e "${RED}❌ S3 mount failed${NC}"
-        exit 1
+        echo -e "${YELLOW}⚠️  Mount may be read-only${NC}"
     fi
+else
+    echo -e "${RED}❌ S3 mount failed${NC}"
+    exit 1
 fi
 
 # Step 5: Build ephemeral runtime
@@ -133,9 +137,9 @@ if docker run --rm --network traefik-network \
     echo -e "${GREEN}✅ Monitor workspace found in S3${NC}"
     
     # Check if monitor has docker-compose.yml
-    if [ -f "/workspaces/monitor/docker-compose.yml" ]; then
+    if [ -f "$WORKSPACE_DIR/monitor/docker-compose.yml" ]; then
         echo -e "${GREEN}Starting monitor from S3...${NC}"
-        cd /workspaces/monitor
+        cd "$WORKSPACE_DIR/monitor"
         docker-compose up -d
         cd - > /dev/null
         
@@ -143,14 +147,14 @@ if docker run --rm --network traefik-network \
         echo -e "   Dashboard: ${BLUE}https://$DOMAIN/monitor${NC}"
     else
         echo -e "${YELLOW}⚠️  Monitor needs docker-compose.yml${NC}"
-        echo "Upload a docker-compose.yml to /workspaces/monitor/"
+        echo "Upload a docker-compose.yml to ./workspaces/monitor/"
     fi
 else
     echo -e "${YELLOW}⚠️  Monitor workspace not found in S3${NC}"
     echo ""
     echo "To set up the monitor workspace:"
     echo "1. Create monitor workspace in S3:"
-    echo "   mkdir /workspaces/monitor"
+    echo "   mkdir ./workspaces/monitor"
     echo ""
     echo "2. Upload monitor code:"
     echo "   - package.json"
@@ -169,14 +173,14 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 echo -e "${GREEN}System Status:${NC}"
 echo -e "  ✅ MinIO S3 Storage: ${BLUE}http://localhost:9001${NC}"
-echo -e "  ✅ S3 Mounted at: ${BLUE}/workspaces${NC}"
+echo -e "  ✅ S3 Mounted at: ${BLUE}./workspaces${NC}"
 echo -e "  ✅ Domain: ${BLUE}$DOMAIN${NC}"
 
 if docker ps | grep -q workspace-monitor; then
     echo -e "  ✅ Monitor: ${BLUE}https://$DOMAIN/monitor${NC}"
     echo ""
     echo -e "${GREEN}The monitor will now:${NC}"
-    echo "  • Scan /workspaces for projects"
+    echo "  • Scan ./workspaces for projects"
     echo "  • Start containers for any workspace with docker-compose.yml"
     echo "  • Manage container lifecycles"
 else
@@ -193,6 +197,6 @@ echo "  3. Monitor will automatically detect and start them"
 echo ""
 echo -e "${YELLOW}Remember:${NC}"
 echo "  • Never run 'npm install' locally"
-echo "  • Edit files directly in /workspaces/"
+echo "  • Edit files directly in ./workspaces/"
 echo "  • Dependencies only exist in containers"
 echo ""

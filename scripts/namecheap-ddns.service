@@ -1,0 +1,13 @@
+[Unit]
+Description=Namecheap Dynamic DNS Updater
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/claude/cloudyknight/scripts/namecheap-ddns-update.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
