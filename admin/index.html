@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Immediate dark mode check - runs before ANY rendering
+        (function() {
+            const savedTheme = localStorage.getItem('admin-theme');
+            const prefersDark = !savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark-theme' || prefersDark) {
+                // Set immediate dark background
+                document.documentElement.style.backgroundColor = '#1a202c';
+                document.documentElement.className = 'dark-theme';
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace Admin - ETdoFresh</title>
+    <style>
+        /* Critical inline styles to prevent flash */
+        html { 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+        html.dark-theme { 
+            background: #1a202c !important;
+        }
+        body {
+            margin: 0;
+            opacity: 0;
+            animation: fadeIn 0.2s ease-in forwards;
+            animation-delay: 0.1s;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-left">
+                <a href="../" class="back-button" title="Back to Workspaces">
+                    <span class="back-icon">←</span>
+                </a>
+                <h1>🛠️ Workspace Administration</h1>
+                <span class="admin-badge">ADMIN</span>
+            </div>
+            <div class="header-right">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button class="btn btn-primary" id="createWorkspaceBtn">
+                    <span class="btn-icon">➕</span>
+                    Create Workspace
+                </button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Statistics Bar -->
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalWorkspaces">0</div>
+                    <div class="stat-label">Total Workspaces</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeWorkspaces">0</div>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="comingSoonWorkspaces">0</div>
+                    <div class="stat-label">Coming Soon</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="hiddenWorkspaces">0</div>
+                    <div class="stat-label">Hidden</div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <button id="refreshList" class="btn btn-secondary">
+                        <span class="btn-icon">🔄</span>
+                        Refresh
+                    </button>
+                    <button id="exportConfig" class="btn btn-secondary">
+                        <span class="btn-icon">📥</span>
+                        Export Config
+                    </button>
+                </div>
+                <div class="toolbar-right">
+                    <div class="search-box">
+                        <input type="text" id="workspaceSearch" placeholder="Search workspaces...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <select id="statusFilter" class="status-filter">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="coming-soon">Coming Soon</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Workspaces Grid -->
+            <div id="workspacesGrid" class="workspaces-grid">
+                <!-- Workspace cards will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Workspace Modal -->
+    <div id="workspaceModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Create New Workspace</h2>
+                <button class="modal-close" id="closeModal">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="workspaceForm">
+                    <input type="hidden" id="workspaceId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="workspaceSlug">Directory Name (Slug) *</label>
+                            <input type="text" id="workspaceSlug" 
+                                   placeholder="e.g., blog, api, dashboard" 
+                                   pattern="[a-z0-9-]+" 
+                                   title="Only lowercase letters, numbers, and hyphens"
+                                   required>
+                            <small class="form-hint">Unique identifier for the workspace directory</small>
+                        </div>
+                        
+                        <div class="form-group form-group-small">
+                            <label for="workspaceIcon">Icon</label>
+                            <div class="icon-selector">
+                                <input type="text" id="workspaceIcon" 
+                                       placeholder="📁" 
+                                       maxlength="2"
+                                       value="📁">
+                                <button type="button" class="icon-picker-btn" id="iconPickerBtn">
+                                    Choose
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="workspaceName">Display Name *</label>
+                        <input type="text" id="workspaceName" 
+                               placeholder="e.g., Blog, API Services, Admin Dashboard" 
+                               required>
+                        <small class="form-hint">Human-readable name shown in the interface</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="workspaceDescription">Description</label>
+                        <textarea id="workspaceDescription" 
+                                  placeholder="Describe what this workspace is for..."
+                                  rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="workspaceStatus">Status *</label>
+                            <select id="workspaceStatus" required>
+                                <option value="active">Active - Visible and accessible</option>
+                                <option value="coming-soon">Coming Soon - Visible but not accessible</option>
+                                <option value="hidden">Hidden - Not visible to users</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="workspaceType">Type</label>
+                            <select id="workspaceType">
+                                <option value="static">Static Site</option>
+                                <option value="nodejs">Node.js App</option>
+                                <option value="python">Python App</option>
+                                <option value="php">PHP App</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="urlPathGroup">
+                        <label for="workspacePath">URL Path</label>
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">workspaces.etdofresh.com/</span>
+                            <input type="text" id="workspacePath" 
+                                   placeholder="Will auto-fill from slug"
+                                   readonly>
+                        </div>
+                        <small class="form-hint">The URL path is automatically generated from the slug</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="deleteWorkspace" class="btn btn-danger hidden">
+                    <span class="btn-icon">🗑️</span>
+                    Delete
+                </button>
+                <button type="button" id="cancelModal" class="btn btn-secondary">Cancel</button>
+                <button type="submit" form="workspaceForm" id="saveWorkspace" class="btn btn-primary">
+                    <span class="btn-icon">💾</span>
+                    Save Workspace
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Icon Picker Modal -->
+    <div id="iconPickerModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Choose an Icon</h2>
+                <button class="modal-close" id="closeIconPicker">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="icon-grid" id="iconGrid">
+                    <!-- Icons will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-confirm">
+            <div class="modal-header">
+                <h2>Confirm Action</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmCancel" class="btn btn-secondary">Cancel</button>
+                <button id="confirmAction" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script type="module" src="./admin.js"></script>
+</body>
+</html>

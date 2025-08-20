@@ -18,11 +18,12 @@ services:
       - traefik.enable=true
       - traefik.docker.network=traefik-network
       
-      # Simple routing configuration
+      # WWW router - lower priority, catches everything except specific paths
       - traefik.http.routers.www.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`)
       - traefik.http.routers.www.entrypoints=websecure
       - traefik.http.routers.www.tls=true
       - traefik.http.routers.www.tls.certresolver=letsencrypt
+      - traefik.http.routers.www.priority=1
       - traefik.http.services.www.loadbalancer.server.port=5173
 
 networks:
