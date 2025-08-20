@@ -101,6 +101,16 @@
       "created": "2025-08-20T20:00:00.000Z"
     },
     {
+      "id": "file-editor",
+      "slug": "file-editor",
+      "name": "File Editor",
+      "icon": "✏️",
+      "description": "Edit workspace files with syntax highlighting and live preview",
+      "status": "active",
+      "type": "nodejs",
+      "created": "2025-08-20T21:00:00.000Z"
+    },
+    {
       "id": "api",
       "slug": "api",
       "name": "API",

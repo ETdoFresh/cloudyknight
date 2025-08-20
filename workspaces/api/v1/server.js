@@ -587,11 +587,21 @@ router.post('/workspaces/:slug/execute', async (req, res) => {
         }
         
         // Security: Basic command filtering (can be enhanced)
-        const dangerousCommands = ['rm -rf /', 'dd if=', 'mkfs', 'fdisk', 'shutdown', 'reboot', 'init'];
-        const commandLower = command.toLowerCase();
+        // Check for dangerous commands - be more specific to avoid false positives
+        const dangerousPatterns = [
+            /\brm\s+-rf\s+\//,     // rm -rf /
+            /\bdd\s+if=/,          // dd if=
+            /\bmkfs\b/,            // mkfs
+            /\bfdisk\b/,           // fdisk
+            /\bshutdown\b/,        // shutdown
+            /\breboot\b/,          // reboot
+            /\b(systemctl|service)\s+(stop|restart|disable).*ssh/,  // SSH service manipulation
+            /\bchmod\s+777\s+\//,  // chmod 777 /
+            /\b:\(\)\s*\{\s*:\|\s*:\s*&\s*\};\s*:/  // Fork bomb
+        ];
         
-        for (const dangerous of dangerousCommands) {
-            if (commandLower.includes(dangerous)) {
+        for (const pattern of dangerousPatterns) {
+            if (pattern.test(command)) {
                 return res.status(403).json({ error: 'Command contains potentially dangerous operations' });
             }
         }

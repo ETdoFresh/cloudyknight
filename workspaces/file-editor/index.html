@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Editor - CloudyKnight</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="hamburger-btn" id="hamburgerBtn" title="Toggle File Tree">☰</button>
+            <h1 class="title">
+                <span class="title-gradient">File Editor</span>
+            </h1>
+        </div>
+        <div class="header-center">
+            <div class="file-status" id="fileStatus">
+                <span class="status-icon" id="statusIcon">●</span>
+                <span class="status-text" id="statusText">No file open</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="icon-btn" id="saveBtn" title="Save (Ctrl+S)" disabled>💾</button>
+            <button class="icon-btn" id="findBtn" title="Find (Ctrl+F)">🔍</button>
+            <button class="icon-btn" id="settingsBtn" title="Editor Settings">⚙️</button>
+            <button class="icon-btn theme-toggle" title="Toggle Theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel - File Tree -->
+        <div class="file-tree-panel" id="fileTreePanel">
+            <button class="mobile-close-btn" id="mobileCloseBtn" title="Close Menu">×</button>
+            <div class="workspace-header">
+                <select id="workspaceSelector" class="workspace-selector">
+                    <option value="">Select Workspace...</option>
+                </select>
+                <button class="icon-btn" id="refreshBtn" title="Refresh">🔄</button>
+                <button class="icon-btn" id="collapseAllBtn" title="Collapse All">⊟</button>
+            </div>
+            <div class="tree-container" id="treeContainer">
+                <div class="empty-state">
+                    <div class="empty-icon">📂</div>
+                    <p>Select a workspace to view files</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Splitter -->
+        <div class="splitter" id="splitter"></div>
+
+        <!-- Right Panel - Editor -->
+        <div class="editor-panel" id="editorPanel">
+            <!-- Editor Toolbar -->
+            <div class="editor-toolbar">
+                <div class="toolbar-left">
+                    <button class="toolbar-btn" id="undoBtn" title="Undo (Ctrl+Z)" disabled>↶</button>
+                    <button class="toolbar-btn" id="redoBtn" title="Redo (Ctrl+Y)" disabled>↷</button>
+                    <div class="toolbar-separator"></div>
+                    <button class="toolbar-btn" id="cutBtn" title="Cut (Ctrl+X)" disabled>✂️</button>
+                    <button class="toolbar-btn" id="copyBtn" title="Copy (Ctrl+C)" disabled>📋</button>
+                    <button class="toolbar-btn" id="pasteBtn" title="Paste (Ctrl+V)" disabled>📌</button>
+                    <div class="toolbar-separator"></div>
+                    <button class="toolbar-btn toggle" id="lineNumbersBtn" title="Toggle Line Numbers">🔢</button>
+                    <button class="toolbar-btn toggle" id="wordWrapBtn" title="Toggle Word Wrap">↩️</button>
+                </div>
+                <div class="toolbar-right">
+                    <span class="editor-info">
+                        <span id="lineInfo">Ln 1, Col 1</span>
+                        <span class="info-separator">|</span>
+                        <span id="selectionInfo">0 selected</span>
+                        <span class="info-separator">|</span>
+                        <span id="encodingInfo">UTF-8</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Editor Container -->
+            <div class="editor-container" id="editorContainer">
+                <div class="line-numbers" id="lineNumbers"></div>
+                <div class="editor-wrapper">
+                    <textarea class="editor-content" id="editorContent" 
+                        placeholder="Open a file to start editing..." 
+                        spellcheck="false"
+                        disabled></textarea>
+                </div>
+            </div>
+
+            <!-- Find/Replace Panel (Hidden by default) -->
+            <div class="find-panel hidden" id="findPanel">
+                <div class="find-row">
+                    <input type="text" class="find-input" id="findInput" placeholder="Find...">
+                    <button class="find-btn" id="findPrevBtn" title="Previous Match (Shift+F3)">⬆</button>
+                    <button class="find-btn" id="findNextBtn" title="Next Match (F3)">⬇</button>
+                    <button class="find-btn toggle" id="caseSensitiveBtn" title="Case Sensitive">Aa</button>
+                    <button class="find-btn toggle" id="wholeWordBtn" title="Whole Word">⬚</button>
+                    <button class="find-btn toggle" id="regexBtn" title="Use Regex">.*</button>
+                    <span class="find-count" id="findCount">0 of 0</span>
+                    <button class="find-close" id="closeFindBtn">×</button>
+                </div>
+                <div class="find-row">
+                    <input type="text" class="find-input" id="replaceInput" placeholder="Replace...">
+                    <button class="find-btn" id="replaceBtn" title="Replace">Replace</button>
+                    <button class="find-btn" id="replaceAllBtn" title="Replace All">Replace All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal hidden" id="settingsModal">
+        <div class="modal-overlay" id="settingsOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editor Settings</h2>
+                <button class="modal-close" id="closeSettingsBtn">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <input type="checkbox" id="autoSaveToggle">
+                        <span>Auto-save (every 30 seconds)</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Font Size</label>
+                    <input type="range" id="fontSizeSlider" min="12" max="24" value="14">
+                    <span id="fontSizeValue">14px</span>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Tab Size</label>
+                    <select id="tabSizeSelect">
+                        <option value="2">2 spaces</option>
+                        <option value="4" selected>4 spaces</option>
+                        <option value="8">8 spaces</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <input type="checkbox" id="showInvisiblesToggle">
+                        <span>Show invisible characters</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <input type="checkbox" id="highlightCurrentLineToggle" checked>
+                        <span>Highlight current line</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Loading file...</p>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>

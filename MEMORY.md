@@ -868,4 +868,107 @@ When migrating standalone HTML/JS apps to CloudyKnight workspaces:
 
 ---
 
-*End of Memory File - Last Updated: 2025-08-20 (File-Viewer migration and API integration patterns)*
+## File-Editor Workspace Implementation
+<!-- Added: 2025-08-20 -->
+
+### Migration from Standalone to CloudyKnight Workspace
+
+The file-editor was successfully migrated from `/home/claude/claude-workspace/frontend/` to CloudyKnight workspace structure at `/home/claude/cloudyknight/workspaces/file-editor/`.
+
+### Command Execution API Security Issues
+
+**Problem**: The API's security filter was blocking legitimate file saves containing words like "initial" or "initialize" because it was checking for dangerous commands using substring matching.
+
+**Solution**: Updated `/home/claude/cloudyknight/workspaces/api/v1/server.js` to use regex patterns with word boundaries instead of substring matching:
+
+```javascript
+// OLD - Too broad, blocks "initial", "initialize", etc.
+if (commandLower.includes('init')) { /* block */ }
+
+// NEW - Only blocks actual dangerous commands
+const dangerousPatterns = [
+    /\brm\s+-rf\s+\//,     // rm -rf /
+    /\bshutdown\b/,        // shutdown (whole word)
+    /\breboot\b/,          // reboot (whole word)
+    // etc.
+];
+```
+
+### File Saving with Special Characters
+
+**Problem**: HTML/JavaScript content with quotes and special characters was failing to save via shell commands.
+
+**Solution**: Use base64 encoding to avoid shell escaping issues:
+
+```javascript
+// Encode content as base64 to avoid shell escaping issues
+const base64Content = btoa(unescape(encodeURIComponent(content)));
+// Write using: echo 'base64_content' | base64 -d > "file"
+```
+
+### File Tree Directory Detection in BusyBox
+
+**Problem**: BusyBox `find` command (used in Alpine containers) doesn't support `-printf` option, and complex find commands weren't recursing properly into directories.
+
+**Failed Attempts**:
+- `find . -type d -exec echo "d:{}" \; -o -type f -exec echo "f:{}" \;` - Didn't recurse
+- `find . -type d -printf "d:%p\n"` - Not supported in BusyBox
+- `while read` loops without proper IFS handling failed silently
+
+**Working Solution**:
+```bash
+find . | while IFS= read -r item; do 
+    if [ -d "$item" ]; then 
+        echo "d:$item"
+    elif [ -f "$item" ]; then 
+        echo "f:$item"
+    fi
+done
+```
+
+### Handling Large Directories in File Tree
+
+**Implementation**: Show directories like `node_modules` and `.git` in the tree but display "Contents not shown due to size" when expanded:
+
+```bash
+# Mark large directories specially
+(find . -maxdepth 1 -type d \( -name node_modules -o -name .git \) | 
+    while IFS= read -r item; do echo "d:$item:large"; done)
+```
+
+Then in JavaScript, handle the `isLargeDirectory` flag to show a special message instead of contents.
+
+### Editor Container State Management
+
+**Problem**: When viewing binary/image files, the entire editor container HTML was replaced, causing errors when switching back to text files (`Cannot set properties of null`).
+
+**Solution**: Check if editor exists and recreate it with event listeners if needed:
+
+```javascript
+let editor = document.getElementById('editorContent');
+if (!editor) {
+    // Restore the editor HTML structure
+    container.innerHTML = `
+        <div class="line-numbers" id="lineNumbers"></div>
+        <div class="editor-wrapper">
+            <textarea class="editor-content" id="editorContent" ...></textarea>
+        </div>
+    `;
+    editor = document.getElementById('editorContent');
+    // Re-attach all event listeners
+}
+```
+
+### Key Lessons
+
+1. **Vite HMR Works Well**: No need to restart Docker containers for JavaScript/CSS changes - Vite's hot module replacement handles it automatically.
+
+2. **BusyBox Limitations**: Alpine's BusyBox utilities have different options than GNU coreutils. Always test commands in the actual container environment.
+
+3. **Shell Command Security**: Be careful with security filters - overly broad substring matching can block legitimate content. Use word boundaries in regex patterns.
+
+4. **State Preservation**: When dynamically replacing DOM elements, always consider how to restore them and their event listeners.
+
+---
+
+*End of Memory File - Last Updated: 2025-08-20 (File-Editor implementation, API security fixes, BusyBox compatibility)*
