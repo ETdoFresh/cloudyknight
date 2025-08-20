@@ -124,38 +124,23 @@
             <div class="modal-body">
                 <form id="workspaceForm">
                     <input type="hidden" id="workspaceId">
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="workspaceSlug">Directory Name (Slug) *</label>
-                            <input type="text" id="workspaceSlug" 
-                                   placeholder="e.g., blog, api, dashboard" 
-                                   pattern="[a-z0-9-]+" 
-                                   title="Only lowercase letters, numbers, and hyphens"
-                                   required>
-                            <small class="form-hint">Unique identifier for the workspace directory</small>
-                        </div>
-                        
-                        <div class="form-group form-group-small">
-                            <label for="workspaceIcon">Icon</label>
-                            <div class="icon-selector">
-                                <input type="text" id="workspaceIcon" 
-                                       placeholder="📁" 
-                                       maxlength="2"
-                                       value="📁">
-                                <button type="button" class="icon-picker-btn" id="iconPickerBtn">
-                                    Choose
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <input type="hidden" id="workspaceSlug">
                     
                     <div class="form-group">
-                        <label for="workspaceName">Display Name *</label>
-                        <input type="text" id="workspaceName" 
-                               placeholder="e.g., Blog, API Services, Admin Dashboard" 
-                               required>
-                        <small class="form-hint">Human-readable name shown in the interface</small>
+                        <label>Workspace Details *</label>
+                        <div class="icon-name-group">
+                            <input type="text" id="workspaceIcon" 
+                                   class="icon-input"
+                                   placeholder="📁" 
+                                   maxlength="2"
+                                   value="📁"
+                                   title="Paste an emoji">
+                            <input type="text" id="workspaceName" 
+                                   class="name-input"
+                                   placeholder="e.g., Blog, API Services, Admin Dashboard" 
+                                   required>
+                        </div>
+                        <small class="form-hint">Icon and display name for the workspace</small>
                     </div>
                     
                     <div class="form-group">
@@ -188,14 +173,16 @@
                     </div>
                     
                     <div class="form-group" id="urlPathGroup">
-                        <label for="workspacePath">URL Path</label>
+                        <label for="workspacePath">URL Path *</label>
                         <div class="input-with-prefix">
                             <span class="input-prefix">workspaces.etdofresh.com/</span>
                             <input type="text" id="workspacePath" 
-                                   placeholder="Will auto-fill from slug"
-                                   readonly>
+                                   placeholder="Auto-generated from display name"
+                                   pattern="[a-z0-9-]+" 
+                                   title="Only lowercase letters, numbers, and hyphens"
+                                   required>
                         </div>
-                        <small class="form-hint">The URL path is automatically generated from the slug</small>
+                        <small class="form-hint">Auto-generated from display name, but can be customized</small>
                     </div>
                 </form>
             </div>
@@ -213,21 +200,6 @@
         </div>
     </div>
 
-    <!-- Icon Picker Modal -->
-    <div id="iconPickerModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content modal-small">
-            <div class="modal-header">
-                <h2>Choose an Icon</h2>
-                <button class="modal-close" id="closeIconPicker">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="icon-grid" id="iconGrid">
-                    <!-- Icons will be populated here -->
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Confirmation Modal -->
     <div id="confirmModal" class="modal hidden">

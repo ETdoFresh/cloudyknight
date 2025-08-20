@@ -1,0 +1,26 @@
+{
+  "workspaces": [
+    {
+      "id": "www",
+      "slug": "www",
+      "name": "www",
+      "icon": "🌐",
+      "description": "Main website and landing pages",
+      "status": "active",
+      "type": "static",
+      "created": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "admin",
+      "slug": "admin",
+      "name": "Admin",
+      "icon": "🔧",
+      "description": "Administration panel for workspace management",
+      "status": "active",
+      "type": "nodejs",
+      "created": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "lastModified": "2025-08-20T00:00:00.000Z",
+  "version": "1.0.0"
+}

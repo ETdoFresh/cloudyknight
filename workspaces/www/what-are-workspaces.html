@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What are Workspaces? - ETdoFresh</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            color: var(--secondary-color);
+        }
+
+        .content-container h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .content-container h2 {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .content-container h3 {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .content-container p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.25rem;
+            font-size: 1.05rem;
+        }
+
+        .content-container ul, .content-container ol {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+
+        .content-container li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .content-container code {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            color: var(--primary-color);
+        }
+
+        .content-container pre {
+            background: #2d3748;
+            color: #f7fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-container pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .content-container blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-secondary);
+            background: rgba(102, 126, 234, 0.05);
+            padding: 1rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .diagram {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .diagram-item {
+            display: inline-block;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .arrow {
+            display: inline-block;
+            margin: 0 1rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            .content-container h1 {
+                font-size: 2rem;
+            }
+
+            .diagram {
+                padding: 1rem;
+            }
+
+            .diagram-item {
+                display: block;
+                margin: 0.5rem auto;
+                max-width: 250px;
+            }
+
+            .arrow {
+                display: block;
+                margin: 0.5rem auto;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .content-container {
+                background: rgba(45, 55, 72, 0.95);
+            }
+
+            .content-container h1,
+            .content-container h2,
+            .content-container h3 {
+                color: #f7fafc;
+            }
+
+            .content-container h1 {
+                -webkit-text-fill-color: transparent;
+            }
+
+            .content-container p,
+            .content-container ul,
+            .content-container ol {
+                color: #cbd5e0;
+            }
+
+            .content-container code {
+                background: rgba(102, 126, 234, 0.2);
+                color: #a5b4fc;
+            }
+
+            .diagram {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            }
+
+            .diagram-item {
+                background: #1a202c;
+                color: #f7fafc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="workspace-container">
+        <div class="content-container">
+            <a href="/" class="back-link">← Back to Workspaces</a>
+            
+            <div id="content">
+                <!-- Markdown content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Markdown content
+        const markdownContent = `
+# What are Workspaces?
+
+Workspaces are **containerized development environments** that combine the best of traditional file systems, cloud storage, and modern development practices into a unified, accessible platform.
+
+## The Workspace Concept
+
+Think of a workspace as your personal development sandbox that lives in the cloud but feels local. Each workspace is a fully-featured environment where you can:
+
+- Write and test code
+- Run services and applications
+- Store and manage files
+- Collaborate with version control
+- Deploy to production
+
+## How Workspaces Differ from Traditional Approaches
+
+### Traditional File Systems
+- **File System**: Local storage on your machine
+- **Workspace**: Cloud-native storage accessible from anywhere
+
+### S3 Objects & Cloud Storage
+- **S3/Object Storage**: Static file storage without execution environment
+- **Workspace**: Dynamic environment with both storage AND compute capabilities
+
+### GitHub Repositories
+- **GitHub Repo**: Version control and code collaboration
+- **Workspace**: Full development environment with integrated version control
+
+## The Architecture of a Workspace
+
+<div class="diagram">
+    <div class="diagram-item">🐳 Docker Container</div>
+    <span class="arrow">↔</span>
+    <div class="diagram-item">💾 Persistent Volume</div>
+    <span class="arrow">↔</span>
+    <div class="diagram-item">☁️ Cloud Sync</div>
+</div>
+
+Each workspace consists of:
+
+### 1. Docker Container
+The heart of your workspace - a lightweight, isolated environment that runs your applications and services. This ensures:
+- Consistent development environment
+- Isolated dependencies
+- Easy scalability
+- Resource efficiency
+
+### 2. Mounted Volume
+Your workspace data persists through a mounted volume that:
+- Survives container restarts
+- Maintains your files and configurations
+- Provides fast local-like performance
+- Enables data portability
+
+### 3. Synchronization Layer
+Automatic syncing to external services ensures:
+- **GitHub Integration**: Your code stays version-controlled
+- **S3/Object Storage**: Large files and assets are backed up
+- **Real-time Updates**: Changes sync automatically
+- **Multi-device Access**: Work from anywhere
+
+### 4. Running Services
+Unlike static storage, workspaces can run:
+- Development servers (npm, yarn, etc.)
+- Database instances
+- API services
+- Background workers
+- Testing environments
+
+## Benefits of Workspaces
+
+### 🚀 **Instant Setup**
+No more "works on my machine" problems. Workspaces come pre-configured with all dependencies.
+
+### 🌍 **Access Anywhere**
+Work from any device with a browser. Your entire development environment travels with you.
+
+### 🔄 **Automatic Backups**
+Never lose work with automatic synchronization to GitHub and cloud storage.
+
+### 🎯 **Purpose-Built**
+Each workspace is tailored for specific tasks:
+- **www**: Web development and static sites
+- **api**: Backend services and APIs
+- **admin**: Management and configuration
+- **docs**: Documentation and knowledge bases
+
+### 🔐 **Secure by Default**
+- Isolated environments prevent conflicts
+- Encrypted connections
+- Access control and permissions
+- Audit trails for compliance
+
+## Real-World Example
+
+Imagine you're building a web application:
+
+1. **Create a Workspace**: Spin up a new 'www' workspace
+2. **Development**: Your code runs in a Docker container with Node.js pre-installed
+3. **File Storage**: Your source files are stored on a persistent volume
+4. **Version Control**: Changes automatically sync to your GitHub repository
+5. **Asset Storage**: Images and large files sync to S3
+6. **Collaboration**: Team members can access the same workspace
+7. **Deployment**: Push to production directly from your workspace
+
+> **In essence**: A workspace is where your code lives, runs, and thrives - combining the flexibility of cloud storage with the power of containerized computing.
+
+## Getting Started
+
+Ready to create your first workspace? Each workspace type is optimized for different tasks:
+
+- **www**: Perfect for websites and frontend applications
+- **admin**: Ideal for managing configurations and settings
+- **api**: Built for backend services and REST APIs
+- **blog**: Optimized for content management
+- **docs**: Designed for technical documentation
+
+Select a workspace from the main dashboard to begin your cloud-native development journey!
+`;
+
+        // Render markdown
+        document.getElementById('content').innerHTML = marked.parse(markdownContent);
+    </script>
+</body>
+</html>

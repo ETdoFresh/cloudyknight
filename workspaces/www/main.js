@@ -8,7 +8,42 @@ class WorkspaceManager {
 
     init() {
         console.log('Workspace Manager initialized');
+        this.checkForInvalidRoute();
         this.attachEventListeners();
+    }
+
+    checkForInvalidRoute() {
+        // Client-side route validation
+        const validPaths = [
+            '/',
+            '/admin',
+            '/www',
+            '/api',
+            '/blog',
+            '/docs',
+            '/analytics',
+            '/database',
+            '/storage',
+            '/monitor',
+            '/settings',
+            '/clock'
+        ];
+
+        const currentPath = window.location.pathname;
+        const isValidPath = validPaths.some(path => 
+            currentPath === path || 
+            currentPath === path + '/' ||
+            (path !== '/' && currentPath.startsWith(path + '/'))
+        );
+
+        // If on an invalid path and not already on 404 page, redirect to 404
+        if (!isValidPath && !currentPath.includes('404')) {
+            console.warn(`Invalid route detected: ${currentPath}`);
+            // In production, this would be handled by server, but for client-side fallback:
+            if (window.location.hostname === 'localhost') {
+                window.location.href = '/404.html';
+            }
+        }
     }
 
     attachEventListeners() {

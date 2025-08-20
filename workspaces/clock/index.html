@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock Workspace</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Clock Workspace</h1>
+            <div class="theme-toggle">
+                <button id="themeToggle" aria-label="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div class="clock-container">
+                <div class="digital-clock">
+                    <div class="time" id="digitalTime">00:00:00</div>
+                    <div class="date" id="digitalDate">Loading...</div>
+                </div>
+
+                <div class="analog-clock">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="98" class="clock-face"/>
+                        <g id="clockNumbers"></g>
+                        <line x1="100" y1="100" x2="100" y2="40" class="hand hour-hand" id="hourHand"/>
+                        <line x1="100" y1="100" x2="100" y2="25" class="hand minute-hand" id="minuteHand"/>
+                        <line x1="100" y1="100" x2="100" y2="20" class="hand second-hand" id="secondHand"/>
+                        <circle cx="100" cy="100" r="4" class="center-dot"/>
+                    </svg>
+                </div>
+
+                <div class="timezone-selector">
+                    <label for="timezone">Timezone:</label>
+                    <select id="timezone">
+                        <option value="local">Local Time</option>
+                        <option value="UTC">UTC</option>
+                        <option value="America/New_York">New York</option>
+                        <option value="Europe/London">London</option>
+                        <option value="Asia/Tokyo">Tokyo</option>
+                        <option value="Australia/Sydney">Sydney</option>
+                    </select>
+                </div>
+
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>Stopwatch</h3>
+                        <div class="stopwatch">
+                            <div class="stopwatch-display" id="stopwatchDisplay">00:00:00</div>
+                            <div class="stopwatch-controls">
+                                <button id="startStopwatch">Start</button>
+                                <button id="resetStopwatch">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Timer</h3>
+                        <div class="timer">
+                            <input type="number" id="timerMinutes" min="0" max="59" value="5" placeholder="Min">
+                            <span>:</span>
+                            <input type="number" id="timerSeconds" min="0" max="59" value="0" placeholder="Sec">
+                            <div class="timer-display" id="timerDisplay">05:00</div>
+                            <div class="timer-controls">
+                                <button id="startTimer">Start</button>
+                                <button id="resetTimer">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>World Clocks</h3>
+                        <div class="world-clocks" id="worldClocks">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Clock Workspace - Real-time timekeeping utilities</p>
+        </footer>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>

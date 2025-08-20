@@ -8,18 +8,12 @@ export default defineConfig({
       protocol: 'wss',
       host: 'workspaces.etdofresh.com'
     },
-    // Watch options for Docker environments
-    watch: {
-      usePolling: true,
-      interval: 1000
-    },
     // Allow requests from these hosts
     allowedHosts: [
       'localhost',
-      'admin',
+      'clock',
       'workspaces.etdofresh.com',
       '.etdofresh.com'
     ]
-  },
-  appType: 'mpa', // Multi-page app mode - don't serve index.html for all routes
+  }
 });

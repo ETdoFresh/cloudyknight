@@ -1,9 +1,16 @@
 // Workspace Admin Panel
 class WorkspaceAdmin {
     constructor() {
-        this.workspaces = this.loadWorkspaces();
+        this.workspaces = [];
         this.currentEditId = null;
+        this.slugManuallyEdited = false;
+        this.apiUrl = '/api/v1';  // API endpoint
         this.initTheme();
+        this.initAsync();
+    }
+    
+    async initAsync() {
+        await this.loadWorkspaces();
         this.init();
     }
 
@@ -11,7 +18,6 @@ class WorkspaceAdmin {
         this.setupEventListeners();
         this.renderWorkspaces();
         this.updateStatistics();
-        this.populateIconPicker();
     }
 
     // Initialize theme from localStorage or system preference
@@ -42,41 +48,27 @@ class WorkspaceAdmin {
         }
     }
 
-    // Load workspaces from localStorage (in production, this would be an API call)
-    loadWorkspaces() {
-        const stored = localStorage.getItem('workspaces');
-        if (stored) {
-            return JSON.parse(stored);
-        }
-        
-        // Default workspaces
-        return [
-            {
-                id: 'www',
-                slug: 'www',
-                name: 'www',
-                icon: '🌐',
-                description: 'Main website and landing pages',
-                status: 'active',
-                type: 'static',
-                created: new Date('2024-01-01').toISOString()
-            },
-            {
-                id: 'admin',
-                slug: 'admin',
-                name: 'Admin',
-                icon: '🔧',
-                description: 'Administration panel for workspace management',
-                status: 'active',
-                type: 'nodejs',
-                created: new Date('2024-01-01').toISOString()
+    // Load workspaces from API
+    async loadWorkspaces() {
+        try {
+            const response = await fetch(`${this.apiUrl}/workspaces`);
+            if (response.ok) {
+                const data = await response.json();
+                this.workspaces = data.workspaces || [];
+            } else {
+                throw new Error('Failed to load workspaces from API');
             }
-        ];
+        } catch (error) {
+            console.error('Error loading workspaces:', error);
+            this.showToast('Failed to load workspaces', 'error');
+            // Fallback to empty array
+            this.workspaces = [];
+        }
     }
 
-    // Save workspaces to localStorage
-    saveWorkspaces() {
-        localStorage.setItem('workspaces', JSON.stringify(this.workspaces));
+    // Save workspaces - no longer needed as API handles persistence
+    async saveWorkspaces() {
+        // API handles persistence, just refresh the UI
         this.renderWorkspaces();
         this.updateStatistics();
         this.updateMainSiteWorkspaces();
@@ -100,23 +92,49 @@ class WorkspaceAdmin {
             this.saveWorkspace();
         });
         
-        // Slug input auto-generates path
-        document.getElementById('workspaceSlug').addEventListener('input', (e) => {
-            const slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-            e.target.value = slug;
-            document.getElementById('workspacePath').value = slug;
+        // Display name input auto-generates URL path
+        document.getElementById('workspaceName').addEventListener('input', (e) => {
+            // Only auto-generate path if it hasn't been manually edited
+            if (!this.slugManuallyEdited) {
+                const displayName = e.target.value;
+                const generatedSlug = this.generateSlug(displayName);
+                document.getElementById('workspacePath').value = generatedSlug;
+                document.getElementById('workspaceSlug').value = generatedSlug;
+            }
+        });
+        
+        // URL Path input handling
+        document.getElementById('workspacePath').addEventListener('input', (e) => {
+            const path = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            e.target.value = path;
+            document.getElementById('workspaceSlug').value = path;
+            
+            // If user clears the field, reset to auto-generation
+            if (path === '') {
+                this.slugManuallyEdited = false;
+                // Immediately generate from display name if it exists
+                const displayName = document.getElementById('workspaceName').value;
+                if (displayName) {
+                    const generatedSlug = this.generateSlug(displayName);
+                    e.target.value = generatedSlug;
+                    document.getElementById('workspaceSlug').value = generatedSlug;
+                }
+            } else {
+                // Mark as manually edited if it differs from auto-generated
+                const displayName = document.getElementById('workspaceName').value;
+                const expectedSlug = this.generateSlug(displayName);
+                if (path !== expectedSlug && displayName !== '') {
+                    this.slugManuallyEdited = true;
+                }
+            }
             
             // Check for uniqueness
-            if (this.currentEditId !== slug && this.workspaces.find(w => w.slug === slug)) {
-                e.target.setCustomValidity('This slug is already in use');
+            if (this.currentEditId !== path && this.workspaces.find(w => w.slug === path)) {
+                e.target.setCustomValidity('This URL path is already in use');
             } else {
                 e.target.setCustomValidity('');
             }
         });
-        
-        // Icon picker
-        document.getElementById('iconPickerBtn').addEventListener('click', () => this.openIconPicker());
-        document.getElementById('closeIconPicker').addEventListener('click', () => this.closeIconPicker());
         
         // Search and filter
         document.getElementById('workspaceSearch').addEventListener('input', () => this.filterWorkspaces());
@@ -147,11 +165,12 @@ class WorkspaceAdmin {
             // Edit mode
             modalTitle.textContent = 'Edit Workspace';
             this.currentEditId = workspace.id;
+            this.slugManuallyEdited = true; // In edit mode, assume slug is intentional
             
             document.getElementById('workspaceId').value = workspace.id;
-            document.getElementById('workspaceSlug').value = workspace.slug;
             document.getElementById('workspaceIcon').value = workspace.icon;
             document.getElementById('workspaceName').value = workspace.name;
+            document.getElementById('workspaceSlug').value = workspace.slug;
             document.getElementById('workspaceDescription').value = workspace.description;
             document.getElementById('workspaceStatus').value = workspace.status;
             document.getElementById('workspaceType').value = workspace.type || 'static';
@@ -163,6 +182,7 @@ class WorkspaceAdmin {
             // Create mode
             modalTitle.textContent = 'Create New Workspace';
             this.currentEditId = null;
+            this.slugManuallyEdited = false; // Reset the manual edit flag
             document.getElementById('workspaceForm').reset();
             document.getElementById('workspaceIcon').value = '📁';
             deleteBtn.classList.add('hidden');
@@ -175,11 +195,12 @@ class WorkspaceAdmin {
         document.getElementById('workspaceModal').classList.add('hidden');
         document.getElementById('workspaceForm').reset();
         this.currentEditId = null;
+        this.slugManuallyEdited = false;
     }
 
-    saveWorkspace() {
+    async saveWorkspace() {
         const formData = {
-            slug: document.getElementById('workspaceSlug').value,
+            slug: document.getElementById('workspacePath').value,  // Use path value as slug
             icon: document.getElementById('workspaceIcon').value || '📁',
             name: document.getElementById('workspaceName').value,
             description: document.getElementById('workspaceDescription').value,
@@ -187,34 +208,43 @@ class WorkspaceAdmin {
             type: document.getElementById('workspaceType').value
         };
         
-        if (this.currentEditId) {
-            // Update existing workspace
-            const index = this.workspaces.findIndex(w => w.id === this.currentEditId);
-            if (index !== -1) {
-                this.workspaces[index] = {
-                    ...this.workspaces[index],
-                    ...formData,
-                    modified: new Date().toISOString()
-                };
-                this.showToast(`Workspace "${formData.name}" updated`, 'success');
+        try {
+            if (this.currentEditId) {
+                // Update existing workspace via API
+                const response = await fetch(`${this.apiUrl}/workspaces/${this.currentEditId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    this.showToast(`Workspace "${formData.name}" updated`, 'success');
+                    await this.loadWorkspaces();
+                } else {
+                    throw new Error('Failed to update workspace');
+                }
+            } else {
+                // Create new workspace via API
+                const response = await fetch(`${this.apiUrl}/workspaces`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    this.showToast(`Workspace "${formData.name}" created`, 'success');
+                    await this.loadWorkspaces();
+                } else if (response.status === 409) {
+                    throw new Error('Workspace with this slug already exists');
+                } else {
+                    throw new Error('Failed to create workspace');
+                }
             }
-        } else {
-            // Create new workspace
-            const newWorkspace = {
-                id: formData.slug,
-                ...formData,
-                created: new Date().toISOString(),
-                modified: new Date().toISOString()
-            };
-            this.workspaces.push(newWorkspace);
-            this.showToast(`Workspace "${formData.name}" created`, 'success');
             
-            // In production, this would also create the actual directory
-            console.log(`Creating directory: /workspaces/${formData.slug}`);
+            this.closeModal();
+        } catch (error) {
+            this.showToast(error.message, 'error');
         }
-        
-        this.saveWorkspaces();
-        this.closeModal();
     }
 
     confirmDelete(id) {
@@ -238,14 +268,23 @@ class WorkspaceAdmin {
         };
     }
 
-    deleteWorkspace(id) {
+    async deleteWorkspace(id) {
         const workspace = this.workspaces.find(w => w.id === id);
-        this.workspaces = this.workspaces.filter(w => w.id !== id);
-        this.saveWorkspaces();
-        this.showToast(`Workspace "${workspace.name}" deleted`, 'success');
         
-        // In production, this would also delete the actual directory
-        console.log(`Deleting directory: /workspaces/${workspace.slug}`);
+        try {
+            const response = await fetch(`${this.apiUrl}/workspaces/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                this.showToast(`Workspace "${workspace.name}" deleted`, 'success');
+                await this.loadWorkspaces();
+            } else {
+                throw new Error('Failed to delete workspace');
+            }
+        } catch (error) {
+            this.showToast(error.message, 'error');
+        }
     }
 
     renderWorkspaces() {
@@ -273,7 +312,7 @@ class WorkspaceAdmin {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
         
         grid.innerHTML = filtered.map(workspace => `
-            <div class="workspace-admin-card">
+            <div class="workspace-admin-card" data-workspace-id="${workspace.id}">
                 <div class="workspace-admin-header">
                     <div class="workspace-admin-info">
                         <div class="workspace-admin-icon">${workspace.icon}</div>
@@ -286,7 +325,7 @@ class WorkspaceAdmin {
                     ${workspace.description || 'No description provided'}
                 </div>
                 <div class="workspace-admin-actions">
-                    <button class="btn btn-secondary btn-small" onclick="workspaceAdmin.openModal(${JSON.stringify(workspace).replace(/"/g, '&quot;')})">
+                    <button class="btn btn-secondary btn-small" onclick="workspaceAdmin.editWorkspace('${workspace.id}')">
                         Edit
                     </button>
                     <button class="btn btn-secondary btn-small" onclick="workspaceAdmin.viewWorkspace('${workspace.slug}')">
@@ -296,6 +335,9 @@ class WorkspaceAdmin {
                         `<button class="btn btn-warning btn-small" onclick="workspaceAdmin.toggleStatus('${workspace.id}')">Hide</button>` :
                         `<button class="btn btn-success btn-small" onclick="workspaceAdmin.toggleStatus('${workspace.id}')">Activate</button>`
                     }
+                    <button class="btn btn-info btn-small" onclick="workspaceAdmin.restartDocker('${workspace.slug}')" title="Restart Docker container">
+                        🔄 Restart
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -314,21 +356,62 @@ class WorkspaceAdmin {
         this.renderWorkspaces();
     }
 
-    viewWorkspace(slug) {
-        window.open(`/${slug}`, '_blank');
-    }
-
-    toggleStatus(id) {
+    editWorkspace(id) {
         const workspace = this.workspaces.find(w => w.id === id);
         if (workspace) {
-            if (workspace.status === 'active') {
-                workspace.status = 'hidden';
-            } else {
-                workspace.status = 'active';
+            this.openModal(workspace);
+        }
+    }
+
+    viewWorkspace(slug) {
+        // Navigate directly to the workspace
+        window.location.href = `/${slug}`;
+    }
+
+    async toggleStatus(id) {
+        const workspace = this.workspaces.find(w => w.id === id);
+        if (workspace) {
+            const newStatus = workspace.status === 'active' ? 'hidden' : 'active';
+            
+            try {
+                const response = await fetch(`${this.apiUrl}/workspaces/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (response.ok) {
+                    if (newStatus === 'hidden') {
+                        this.showToast(`Workspace "${workspace.name}" is now hidden`, 'warning');
+                    } else {
+                        this.showToast(`Workspace "${workspace.name}" is now active`, 'success');
+                    }
+                    await this.loadWorkspaces();
+                } else {
+                    throw new Error('Failed to update workspace status');
+                }
+            } catch (error) {
+                this.showToast(error.message, 'error');
             }
-            workspace.modified = new Date().toISOString();
-            this.saveWorkspaces();
-            this.showToast(`Workspace "${workspace.name}" status updated`, 'success');
+        }
+    }
+
+    async restartDocker(slug) {
+        try {
+            this.showToast(`Restarting Docker container for ${slug}...`, 'info');
+            
+            const response = await fetch(`${this.apiUrl}/workspaces/${slug}/docker/restart`, {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                this.showToast(`Docker container for ${slug} restarted successfully`, 'success');
+            } else {
+                throw new Error('Failed to restart Docker container');
+            }
+        } catch (error) {
+            this.showToast(`Failed to restart Docker container: ${error.message}`, 'error');
         }
     }
 
@@ -344,33 +427,14 @@ class WorkspaceAdmin {
         document.getElementById('hiddenWorkspaces').textContent = hidden;
     }
 
-    // Icon Picker
-    openIconPicker() {
-        document.getElementById('iconPickerModal').classList.remove('hidden');
-    }
-
-    closeIconPicker() {
-        document.getElementById('iconPickerModal').classList.add('hidden');
-    }
-
-    populateIconPicker() {
-        const icons = [
-            '📁', '🌐', '🔧', '⚡', '📝', '📚', '📊', '🗄️', '💾', '🔍',
-            '⚙️', '🚀', '💻', '🎨', '📱', '🔒', '🔑', '📧', '📞', '📍',
-            '🏠', '🏢', '🏪', '🎯', '🎲', '🎮', '🎵', '🎬', '📷', '🖼️',
-            '📈', '📉', '💰', '💳', '🛒', '🛍️', '📦', '🚚', '✈️', '🚗',
-            '🔔', '📢', '💬', '💭', '❤️', '⭐', '🏆', '🎁', '🎉', '🔥'
-        ];
-        
-        const grid = document.getElementById('iconGrid');
-        grid.innerHTML = icons.map(icon => `
-            <div class="icon-item" onclick="workspaceAdmin.selectIcon('${icon}')">${icon}</div>
-        `).join('');
-    }
-
-    selectIcon(icon) {
-        document.getElementById('workspaceIcon').value = icon;
-        this.closeIconPicker();
+    // Helper method to generate slug from display name
+    generateSlug(displayName) {
+        return displayName
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+            .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
     }
 
     // Export configuration
