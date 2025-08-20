@@ -4,46 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETdoFresh Workspaces</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>ETdoFresh Workspaces</h1>
-            <div class="status">
-                <span class="status-indicator"></span>
-                <span>System Online</span>
-            </div>
+    <div class="workspace-container">
+        <header class="workspace-header">
+            <h1>🚀 ETdoFresh Workspaces</h1>
+            <p class="workspace-subtitle">Your centralized workspace management system</p>
+        </header>
+
+        <div class="workspaces-grid" id="workspace-grid">
+            <!-- www Workspace -->
+            <a href="/www" class="workspace-card">
+                <div class="workspace-icon">🌐</div>
+                <h3>www</h3>
+                <p>Main website and landing pages</p>
+                <div class="workspace-badge">Active</div>
+            </a>
+
+            <!-- Admin Workspace -->
+            <a href="/admin" class="workspace-card">
+                <div class="workspace-icon">🔧</div>
+                <h3>Admin</h3>
+                <p>Administration panel for workspace management</p>
+                <div class="workspace-badge">Active</div>
+            </a>
+
+            <!-- API Workspace -->
+            <a href="/api" class="workspace-card coming-soon">
+                <div class="workspace-icon">⚡</div>
+                <h3>API</h3>
+                <p>Backend API services and endpoints</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
+
+            <!-- Blog Workspace -->
+            <a href="/blog" class="workspace-card coming-soon">
+                <div class="workspace-icon">📝</div>
+                <h3>Blog</h3>
+                <p>Blog and content management system</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
+
+            <!-- Docs Workspace -->
+            <a href="/docs" class="workspace-card coming-soon">
+                <div class="workspace-icon">📚</div>
+                <h3>Documentation</h3>
+                <p>Technical documentation and guides</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
+
+            <!-- Analytics Workspace -->
+            <a href="/analytics" class="workspace-card coming-soon">
+                <div class="workspace-icon">📊</div>
+                <h3>Analytics</h3>
+                <p>Monitor and analyze workspace metrics</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
+
+            <!-- Database Workspace -->
+            <a href="/database" class="workspace-card coming-soon">
+                <div class="workspace-icon">🗄️</div>
+                <h3>Database</h3>
+                <p>Database management and exploration</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
+
+            <!-- Storage Workspace -->
+            <a href="/storage" class="workspace-card coming-soon">
+                <div class="workspace-icon">💾</div>
+                <h3>Storage</h3>
+                <p>File storage and media management</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
+
+            <!-- Monitor Workspace -->
+            <a href="/monitor" class="workspace-card coming-soon">
+                <div class="workspace-icon">🔍</div>
+                <h3>Monitor</h3>
+                <p>System monitoring and health checks</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
+
+            <!-- Settings Workspace -->
+            <a href="/settings" class="workspace-card coming-soon">
+                <div class="workspace-icon">⚙️</div>
+                <h3>Settings</h3>
+                <p>Configure your workspace environment</p>
+                <div class="workspace-badge">Coming Soon</div>
+            </a>
         </div>
-    </header>
 
-    <main>
-        <div class="welcome-card">
-            <h2>Welcome to ETdoFresh Workspaces</h2>
-            <p>
-                This is your centralized workspace management system. Each workspace is an isolated Docker container
-                that can run different types of applications - from static websites to dynamic Node.js applications.
-            </p>
-            <p>
-                <strong>Current Status:</strong> Workspaces are loading...
-            </p>
-        </div>
-
-        <section id="workspaces">
-            <h2 style="color: white; margin-bottom: 1rem;">Available Workspaces</h2>
-            <div class="workspace-grid" id="workspace-grid">
-                <!-- Workspaces will be loaded here by JavaScript -->
-                <div class="placeholder">
-                    <div class="loading"></div>
-                    <h3>Loading workspaces...</h3>
-                    <p>Please wait while we scan for available workspaces.</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>© 2025 ETdoFresh Workspace • Powered by Docker & Traefik</p>
-    </footer>
+        <footer class="workspace-footer">
+            <p>© 2025 ETdoFresh Workspaces • Powered by Docker & Traefik</p>
+        </footer>
+    </div>
 
     <script type="module" src="/main.js"></script>
 </body>

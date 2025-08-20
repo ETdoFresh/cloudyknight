@@ -3,81 +3,40 @@ import './style.css';
 // Workspace Manager Module
 class WorkspaceManager {
     constructor() {
-        this.workspaces = [];
-        this.grid = document.getElementById('workspace-grid');
         this.init();
     }
 
     init() {
         console.log('Workspace Manager initialized');
-        this.loadWorkspaces();
-        
-        // Set up auto-refresh every 30 seconds
-        setInterval(() => this.loadWorkspaces(), 30000);
+        this.attachEventListeners();
     }
 
-    async loadWorkspaces() {
-        // For now, use mock data
-        // TODO: Replace with actual API call
+    attachEventListeners() {
+        // Add staggered animation indices for floating effect
+        document.querySelectorAll('.workspace-card').forEach((card, index) => {
+            card.style.setProperty('--card-index', index);
+        });
+
+        // Add click handlers for coming soon cards
+        document.querySelectorAll('.workspace-card.coming-soon').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showComingSoonMessage(card.querySelector('h3').textContent);
+            });
+        });
+    }
+
+    showComingSoonMessage(workspaceName) {
+        // Create a temporary notification
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = `${workspaceName} workspace is coming soon!`;
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
         setTimeout(() => {
-            this.workspaces = [
-                {
-                    name: 'www',
-                    path: '/www',
-                    description: 'Main website and landing pages',
-                    status: 'active',
-                    icon: '🌐'
-                },
-                {
-                    name: 'api',
-                    path: '/api',
-                    description: 'Backend API services',
-                    status: 'pending',
-                    icon: '⚡'
-                },
-                {
-                    name: 'blog',
-                    path: '/blog',
-                    description: 'Blog and content management',
-                    status: 'pending',
-                    icon: '📝'
-                },
-                {
-                    name: 'admin',
-                    path: '/admin',
-                    description: 'Administration panel',
-                    status: 'active',
-                    icon: '🔧'
-                }
-            ];
-            this.renderWorkspaces();
-        }, 2000);
-    }
-
-    renderWorkspaces() {
-        if (this.workspaces.length === 0) {
-            this.grid.innerHTML = `
-                <div class="placeholder">
-                    <div class="loading"></div>
-                    <h3>Scanning for workspaces...</h3>
-                    <p>Workspace containers will appear here once they are deployed.</p>
-                </div>
-            `;
-            return;
-        }
-
-        this.grid.innerHTML = this.workspaces.map(workspace => `
-            <a href="${workspace.path}" class="workspace-card">
-                <div class="workspace-header">
-                    <div class="workspace-icon">${workspace.icon}</div>
-                    <div>
-                        <div class="workspace-title">${workspace.name}</div>
-                    </div>
-                </div>
-                <div class="workspace-description">${workspace.description}</div>
-                <span class="workspace-status ${workspace.status === 'active' ? 'active' : ''}">${workspace.status}</span>
-            </a>
-        `).join('');
+            notification.remove();
+        }, 3000);
     }
 }
 
