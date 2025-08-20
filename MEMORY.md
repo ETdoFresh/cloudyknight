@@ -971,4 +971,109 @@ if (!editor) {
 
 ---
 
-*End of Memory File - Last Updated: 2025-08-20 (File-Editor implementation, API security fixes, BusyBox compatibility)*
+## Multi-Pane Browser Workspace Implementation
+<!-- Added: 2025-08-20 -->
+
+### Migration from Standalone to CloudyKnight Workspace
+
+The multi-pane browser was successfully migrated from `/home/claude/claude-workspace/frontend/multi-pane-browser.html` to CloudyKnight workspace structure at `/home/claude/cloudyknight/workspaces/multi-pane-browser/`.
+
+**Workspace Details**:
+- **Location**: `/home/claude/cloudyknight/workspaces/multi-pane-browser/`
+- **URL**: `https://workspaces.etdofresh.com/multi-pane-browser/`
+- **Port**: 5173 (Vite dev server)
+- **Docker Image**: Node.js 20 Alpine
+- **Purpose**: Browse multiple workspaces simultaneously with customizable layouts
+
+### Key Migration Changes
+
+**Theme Synchronization**:
+- Updated localStorage key from `theme` to `workspace-theme` for consistency
+- Changed CSS class from `dark-theme` to `dark-mode` to match other workspaces
+- Added system preference detection fallback
+
+**Default URL Updates**:
+- Changed default home page from `/admin/` to `/` (workspace browser)
+- Updated all default URL references to use root page instead of admin panel
+- This provides a better starting experience for users to discover workspaces
+
+**Asset Path Updates**:
+- Changed from absolute paths (`css/multi-pane-browser.css`) to relative paths (`./style.css`)
+- Updated script reference from `js/multi-pane-browser.js` to `./main.js`
+- Updated Quick Links to reference CloudyKnight workspace URLs
+
+### Advanced Multi-Pane Features
+
+**Nested Frame Management**:
+- Sophisticated storage prefix system using hierarchical frame paths
+- Visual frame depth indicators with color-coded nesting levels
+- Automatic frame ID injection for multi-pane browser recursion
+- Cross-origin frame detection and fallback mechanisms
+
+**Layout System**:
+- 7 different layout options: horizontal/vertical splits, 2x2 grid, mixed layouts
+- Advanced resizable pane system with mouse drag support
+- Grid layouts with omnidirectional center dot resizer
+- Layout persistence with frame-aware localStorage keys
+
+**URL Management**:
+- Clean URL display (removes frame IDs and cache-busting params)
+- Automatic URL saving/restoration on layout changes
+- Support for same-origin and cross-origin iframe navigation tracking
+- Cache-busting for recursive multi-pane browser instances
+
+### Configuration Files
+
+**Vite Configuration** (`vite.config.js`):
+```javascript
+export default defineConfig({
+  base: '/multi-pane-browser/',
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    hmr: {
+      clientPort: 443,
+      protocol: 'wss',
+      host: 'workspaces.etdofresh.com',
+      path: '/multi-pane-browser/@vite'
+    }
+  }
+});
+```
+
+**Docker Compose** (`docker-compose.yml`):
+- Standard CloudyKnight pattern with Node.js 20 Alpine
+- Traefik labels with `/multi-pane-browser` PathPrefix
+- Trailing slash redirect middleware
+- External traefik-network connection
+
+### Workspace Registration
+
+Added to `/home/claude/cloudyknight/workspaces/admin/workspaces.json`:
+```json
+{
+  "id": "multi-pane-browser",
+  "slug": "multi-pane-browser",
+  "name": "Multi-Pane Browser", 
+  "icon": "🪟",
+  "description": "Browse multiple workspaces simultaneously with customizable layouts",
+  "status": "active",
+  "type": "nodejs"
+}
+```
+
+### Key Implementation Insights
+
+1. **Complex Frame Nesting**: The storage prefix system elegantly handles unlimited nesting depth while maintaining unique storage namespaces.
+
+2. **Responsive Resizers**: The resizer system adapts to different layout types (horizontal, vertical, grid, mixed) with appropriate constraints and visual feedback.
+
+3. **Theme Consistency**: Using `workspace-theme` localStorage key enables seamless theme synchronization across all CloudyKnight workspaces.
+
+4. **URL Cleaning**: Sophisticated URL management keeps the interface clean while preserving technical functionality for frame hierarchy.
+
+5. **Migration Pattern**: This migration demonstrates the complete pattern for moving complex standalone HTML/CSS/JS applications into the CloudyKnight workspace ecosystem.
+
+---
+
+*End of Memory File - Last Updated: 2025-08-20 (Multi-Pane Browser migration, File-Editor implementation, API security fixes, BusyBox compatibility)*

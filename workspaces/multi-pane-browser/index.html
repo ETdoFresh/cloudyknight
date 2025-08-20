@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Pane Browser</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <!-- Layout Selector Modal -->
+    <div id="layoutModal" class="modal active">
+        <div class="modal-content">
+            <h2>Choose Your Layout</h2>
+            <div class="layout-grid">
+                <!-- 50/50 Horizontal -->
+                <div class="layout-option" data-layout="horizontal-50-50">
+                    <div class="layout-preview" style="flex-direction: column;">
+                        <div class="preview-pane" style="width: 100%; height: 50%;"></div>
+                        <div class="preview-pane" style="width: 100%; height: 50%;"></div>
+                    </div>
+                    <span>50/50 Horizontal</span>
+                </div>
+
+                <!-- 50/50 Vertical -->
+                <div class="layout-option" data-layout="vertical-50-50">
+                    <div class="layout-preview">
+                        <div class="preview-pane" style="width: 50%; height: 100%;"></div>
+                        <div class="preview-pane" style="width: 50%; height: 100%;"></div>
+                    </div>
+                    <span>50/50 Vertical</span>
+                </div>
+
+                <!-- 2x2 Grid -->
+                <div class="layout-option" data-layout="grid-2x2">
+                    <div class="layout-preview grid-2x2">
+                        <div class="preview-pane"></div>
+                        <div class="preview-pane"></div>
+                        <div class="preview-pane"></div>
+                        <div class="preview-pane"></div>
+                    </div>
+                    <span>2x2 Grid</span>
+                </div>
+
+                <!-- Two Left, One Right -->
+                <div class="layout-option" data-layout="two-left-one-right">
+                    <div class="layout-preview">
+                        <div class="preview-column" style="width: 66%; height: 100%;">
+                            <div class="preview-pane" style="width: 100%; height: 50%;"></div>
+                            <div class="preview-pane" style="width: 100%; height: 50%;"></div>
+                        </div>
+                        <div class="preview-pane" style="width: 34%; height: 100%;"></div>
+                    </div>
+                    <span>Two Left, One Right</span>
+                </div>
+
+                <!-- One Left, Two Right -->
+                <div class="layout-option" data-layout="one-left-two-right">
+                    <div class="layout-preview">
+                        <div class="preview-pane" style="width: 34%; height: 100%;"></div>
+                        <div class="preview-column" style="width: 66%; height: 100%;">
+                            <div class="preview-pane" style="width: 100%; height: 50%;"></div>
+                            <div class="preview-pane" style="width: 100%; height: 50%;"></div>
+                        </div>
+                    </div>
+                    <span>One Left, Two Right</span>
+                </div>
+
+                <!-- 1x3 Equal -->
+                <div class="layout-option" data-layout="three-equal">
+                    <div class="layout-preview">
+                        <div class="preview-pane" style="width: 33.33%; height: 100%;"></div>
+                        <div class="preview-pane" style="width: 33.33%; height: 100%;"></div>
+                        <div class="preview-pane" style="width: 33.33%; height: 100%;"></div>
+                    </div>
+                    <span>Three Equal Columns</span>
+                </div>
+
+                <!-- 1x3 Focused -->
+                <div class="layout-option" data-layout="three-focused">
+                    <div class="layout-preview">
+                        <div class="preview-pane" style="width: 25%; height: 100%;"></div>
+                        <div class="preview-pane" style="width: 50%; height: 100%;"></div>
+                        <div class="preview-pane" style="width: 25%; height: 100%;"></div>
+                    </div>
+                    <span>Three Columns (Center Focus)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <a href="/" class="back-button" title="Back to Home">
+                    <span class="back-icon">←</span>
+                </a>
+                <h1>Multi-Pane Browser</h1>
+            </div>
+            <div class="header-right">
+                <button id="changeLayoutBtn" class="btn-secondary">Change Layout</button>
+                <button id="resetLayoutBtn" class="btn-secondary">Reset</button>
+                <button id="themeToggleBtn" class="btn-icon theme-toggle" title="Toggle Theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button id="fullscreenBtn" class="btn-icon" title="Fullscreen">
+                    <span>⛶</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Panes Container -->
+        <div id="panesContainer" class="panes-container">
+            <!-- Panes will be dynamically generated here -->
+        </div>
+    </div>
+
+    <!-- Quick Links Sidebar (Hidden by default) -->
+    <div id="quickLinks" class="quick-links">
+        <h3>Quick Links</h3>
+        <button class="quick-link" data-url="/admin/">Admin Panel</button>
+        <button class="quick-link" data-url="/file-browser/">File Browser</button>
+        <button class="quick-link" data-url="/file-viewer/">File Viewer</button>
+        <button class="quick-link" data-url="/file-editor/">File Editor</button>
+        <button class="quick-link" data-url="/investment/">Investment Tracker</button>
+        <button class="quick-link" data-url="/clock/">Clock</button>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
