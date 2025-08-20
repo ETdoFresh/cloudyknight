@@ -1,0 +1,39 @@
+services:
+  file-viewer:
+    image: node:20-alpine
+    container_name: file-viewer
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - NODE_ENV=development
+      - VITE_HOST=0.0.0.0
+      - DOMAIN=workspaces.etdofresh.com
+    networks:
+      - traefik-network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      
+      # HTTPS Router
+      - traefik.http.routers.file-viewer.rule=Host(`${DOMAIN}`) && PathPrefix(`/file-viewer`)
+      - traefik.http.routers.file-viewer.entrypoints=websecure
+      - traefik.http.routers.file-viewer.tls=true
+      - traefik.http.routers.file-viewer.tls.certresolver=letsencrypt
+      - traefik.http.routers.file-viewer.priority=10
+      - traefik.http.services.file-viewer.loadbalancer.server.port=5173
+      
+      # Redirect to add trailing slash
+      - traefik.http.middlewares.file-viewer-redirect.redirectregex.regex=^https?://([^/]+)/file-viewer$$
+      - traefik.http.middlewares.file-viewer-redirect.redirectregex.replacement=https://$$1/file-viewer/
+      - traefik.http.middlewares.file-viewer-redirect.redirectregex.permanent=true
+      
+      # Apply middleware
+      - traefik.http.routers.file-viewer.middlewares=file-viewer-redirect
+    restart: unless-stopped
+
+networks:
+  traefik-network:
+    external: true

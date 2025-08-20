@@ -91,6 +91,16 @@
       "created": "2025-08-20T19:30:00.000Z"
     },
     {
+      "id": "file-viewer",
+      "slug": "file-viewer",
+      "name": "File Viewer",
+      "icon": "📄",
+      "description": "View and explore file contents with syntax highlighting",
+      "status": "active",
+      "type": "nodejs",
+      "created": "2025-08-20T20:00:00.000Z"
+    },
+    {
       "id": "api",
       "slug": "api",
       "name": "API",
@@ -171,6 +181,6 @@
       "created": "2025-08-20T00:00:00.000Z"
     }
   ],
-  "lastModified": "2025-08-20T19:31:00.000Z",
+  "lastModified": "2025-08-20T20:00:00.000Z",
   "version": "1.0.0"
 }

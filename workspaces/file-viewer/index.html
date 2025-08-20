@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Viewer - CloudyKnight</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="hamburger-btn" id="hamburgerBtn" title="Toggle File Tree">☰</button>
+            <button class="back-btn" onclick="window.location.href='/file-viewer/'">← Back</button>
+            <h1 class="title">
+                <span class="title-gradient">File Viewer</span>
+            </h1>
+        </div>
+        <div class="header-right">
+            <button class="icon-btn" id="refreshBtn" title="Refresh">🔄</button>
+            <button class="icon-btn theme-toggle" title="Toggle Theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Left Panel - File Tree -->
+        <div class="file-tree-panel" id="fileTreePanel">
+            <button class="mobile-close-btn" id="mobileCloseBtn" title="Close Menu">×</button>
+            <div class="workspace-header">
+                <select id="workspaceSelector" class="workspace-selector">
+                    <option value="">Select Workspace...</option>
+                </select>
+                <button class="icon-btn" id="collapseAllBtn" title="Collapse All">⊟</button>
+            </div>
+            <div class="tree-container" id="treeContainer">
+                <div class="empty-state">
+                    <div class="empty-icon">📂</div>
+                    <p>Select a workspace to view files</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Splitter -->
+        <div class="splitter" id="splitter"></div>
+
+        <!-- Right Panel - Content Viewer -->
+        <div class="content-panel" id="contentPanel">
+            <div class="panel-header">
+                <div class="file-info">
+                    <span class="file-icon" id="fileIcon"></span>
+                    <span class="file-name" id="fileName">No file selected</span>
+                </div>
+                <div class="content-actions">
+                    <button class="icon-btn" id="downloadBtn" title="Download" style="display: none;">⬇️</button>
+                    <button class="icon-btn" id="copyBtn" title="Copy Link" style="display: none;">🔗</button>
+                    <button class="icon-btn" id="fullscreenBtn" title="Fullscreen" style="display: none;">⛶</button>
+                </div>
+            </div>
+            <div class="content-viewer" id="contentViewer">
+                <div class="empty-viewer">
+                    <div class="empty-icon">📄</div>
+                    <h3>No File Selected</h3>
+                    <p>Select a file from the tree to view its contents</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Loading file...</p>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- Markdown parser library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>

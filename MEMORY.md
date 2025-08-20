@@ -90,6 +90,30 @@ This file serves as a hierarchical knowledge base for the CloudyKnight project. 
 - **Purpose**: Browse and manage workspace files and directories
 - **Migration Notes**: Migrated from standalone HTML/JS at `/home/claude/claude-workspace/frontend/`
 
+### File Viewer Workspace
+<!-- Added: 2025-08-20 -->
+- **Location**: `/home/claude/cloudyknight/workspaces/file-viewer/`
+- **URL**: `https://workspaces.etdofresh.com/file-viewer/`
+- **Port**: 5173 (Vite dev server)
+- **Docker Image**: Node.js 20 Alpine
+- **Purpose**: View and explore file contents with syntax highlighting and markdown rendering
+- **Features**: 
+  - Tree view file navigation
+  - Syntax highlighting for code files
+  - Markdown rendering with marked library
+  - Image preview support (via base64 encoding)
+  - Binary file detection and download
+  - Dark mode synchronized with workspace-theme
+- **API Integration**:
+  - Uses command execution API (`/api/v1/workspaces/${slug}/execute`)
+  - Lists files with `find` command
+  - Reads text files with `cat` command
+  - Encodes binary/images with `base64` command
+  - Gets file metadata with `stat` command
+- **Migration Notes**: 
+  - Migrated from standalone HTML/JS at `/home/claude/claude-workspace/frontend/`
+  - Updated from non-existent `/api/v1/files` endpoint to command execution API
+
 ### Workspace Structure
 Each workspace is self-contained with:
 - `docker-compose.yml` - Container configuration
@@ -682,4 +706,166 @@ The API returns workspace data wrapped in an object with metadata, not as a raw 
 
 ---
 
-*End of Memory File - Last Updated: 2025-08-20 (Command Execution API and File-Browser refactoring)*
+## File-Viewer Workspace Implementation
+<!-- Added: 2025-08-20 -->
+
+### API Migration from Non-Existent Endpoints
+
+**Problem**: File-viewer tried to use `/api/v1/files/${workspaceId}/` endpoint which doesn't exist in the CloudyKnight API.
+
+**Solution**: Migrate to command execution API pattern used by file-browser:
+```javascript
+// OLD (doesn't work):
+const response = await fetch(`/api/v1/files/${workspaceId}/?recursive=true`);
+
+// NEW (working):
+const response = await fetch(`/api/v1/workspaces/${workspaceSlug}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        command: `find . -type f -o -type d`,
+        cwd: '.'
+    })
+});
+```
+
+### File Operations via Command API
+
+**Reading Text Files**:
+```javascript
+// Use cat command for text content
+const response = await fetch(`/api/v1/workspaces/${workspaceSlug}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        command: `cat "${filePath}"`,
+        cwd: '.'
+    })
+});
+const content = response.json().result.stdout;
+```
+
+**Handling Binary/Image Files**:
+```javascript
+// Use base64 encoding for binary data
+const response = await fetch(`/api/v1/workspaces/${workspaceSlug}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        command: `base64 "${filePath}"`,
+        cwd: '.'
+    })
+});
+// Convert to data URL for images
+const base64 = response.json().result.stdout.replace(/\n/g, '');
+const dataUrl = `data:${mimeType};base64,${base64}`;
+```
+
+**File Metadata**:
+```javascript
+// Use stat command for file info
+command: `stat -c "%s %Y" "${filePath}" 2>/dev/null || echo "0 0"`
+// Returns: fileSize modificationTime
+```
+
+### Efficient File Tree Loading
+
+**Optimized find command with type detection**:
+```javascript
+// Single command to get files with types
+command: `find "${path}" -maxdepth 10 \\( -type f -o -type d \\) -exec sh -c 'if [ -d "$1" ]; then echo "d:$1"; else echo "f:$1"; fi' _ {} \\; | head -500`
+// Output format: "d:./directory" or "f:./file.txt"
+```
+
+### Common Pitfalls and Solutions
+
+**Issue**: Reference to undefined variables in template literals
+- **Example**: `console.log('URL:', url)` when `url` was never defined
+- **Solution**: Remove debug statements or ensure all variables are defined
+
+**Issue**: Docker Compose environment variables not set
+- **Symptom**: Empty Host rule in Traefik labels
+- **Solution**: Always run with DOMAIN variable: `DOMAIN=workspaces.etdofresh.com docker-compose up -d`
+
+**Issue**: Parsing stat command output
+- **Problem**: `formatFileSize(fileSize)` fails when fileSize is a string
+- **Solution**: Parse as integer: `const fileSize = parseInt(fileSizeStr) || 0`
+
+### Download Implementation Pattern
+
+**Creating blob downloads from command API**:
+```javascript
+async downloadFile() {
+    const isBinary = this.isBinaryFile(filename);
+    const command = isBinary ? `base64 "${path}"` : `cat "${path}"`;
+    
+    // Fetch content
+    const response = await fetch(`/api/v1/workspaces/${slug}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command, cwd: '.' })
+    });
+    
+    const content = response.json().result.stdout;
+    
+    // Create blob
+    let blob;
+    if (isBinary) {
+        const binaryString = atob(content.replace(/\n/g, ''));
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        blob = new Blob([bytes]);
+    } else {
+        blob = new Blob([content], { type: 'text/plain' });
+    }
+    
+    // Trigger download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+```
+
+---
+
+## Workspace Migration Checklist
+<!-- Added: 2025-08-20 -->
+
+When migrating standalone HTML/JS apps to CloudyKnight workspaces:
+
+1. **File Structure**:
+   - Rename main HTML to `index.html`
+   - Rename main JS to `main.js`
+   - Rename main CSS to `style.css`
+   - Use relative paths (`./main.js` not `/js/main.js`)
+
+2. **Theme Synchronization**:
+   - Change theme localStorage key to `workspace-theme`
+   - Change dark theme class from custom names to `dark-mode`
+   - Include system preference fallback
+
+3. **API Integration**:
+   - Check if workspace uses file operations
+   - If yes, migrate to command execution API
+   - Update workspace ID references to use `slug` property
+   - Handle API responses that may be wrapped in objects
+
+4. **Docker Compose Setup**:
+   - Always set DOMAIN environment variable when running
+   - Use consistent container naming (match workspace slug)
+   - Include `/app/node_modules` anonymous volume
+
+5. **Testing**:
+   - Verify Vite serves assets correctly with base path
+   - Test file operations if applicable
+   - Confirm theme synchronization works
+   - Check Traefik routing with curl
+
+---
+
+*End of Memory File - Last Updated: 2025-08-20 (File-Viewer migration and API integration patterns)*
