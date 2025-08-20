@@ -31,11 +31,8 @@ services:
       - traefik.http.middlewares.clock-redirect.redirectregex.replacement=https://$$1/clock/
       - traefik.http.middlewares.clock-redirect.redirectregex.permanent=true
       
-      # Strip the /clock prefix before forwarding to the service
-      - traefik.http.middlewares.clock-stripprefix.stripprefix.prefixes=/clock
-      
-      # Apply middlewares only to main clock router
-      - traefik.http.routers.clock.middlewares=clock-redirect,clock-stripprefix
+      # Apply only redirect middleware (no prefix stripping since Vite base is /clock/)
+      - traefik.http.routers.clock.middlewares=clock-redirect
 
 networks:
   traefik-network:
