@@ -64,11 +64,16 @@ const handle404Plugin = () => {
 
 export default defineConfig({
   server: {
+    port: 5173,
     host: '0.0.0.0',
     hmr: {
       clientPort: 443,
       protocol: 'wss',
       host: 'workspaces.etdofresh.com'
+    },
+    watch: {
+      usePolling: true,
+      interval: 1000
     },
     // Allow requests from these hosts
     allowedHosts: [

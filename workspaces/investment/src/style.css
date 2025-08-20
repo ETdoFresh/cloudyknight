@@ -1,0 +1,579 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #444;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.investment-stats {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.stat-item {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #4a90e2;
+}
+
+.initial-investment-section {
+  margin-bottom: 2rem;
+}
+
+.initial-total {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+main {
+  display: grid;
+  gap: 2rem;
+}
+
+section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h2 {
+  margin-bottom: 1rem;
+  color: #4a90e2;
+}
+
+h3 {
+  margin-bottom: 0.75rem;
+  color: #50c878;
+}
+
+.ownership-section {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.chart-container {
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+}
+
+#pieChart {
+  width: 100%;
+  height: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+th {
+  background: rgba(74, 144, 226, 0.2);
+  font-weight: bold;
+}
+
+tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.gain {
+  color: #50c878;
+}
+
+.loss {
+  color: #ff6b6b;
+}
+
+.header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.investor-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.investor-selector label {
+  font-weight: 500;
+}
+
+.investor-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #999;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.investment-graph {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+#investmentGraph {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+}
+
+.input-group, .transaction-inputs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.calculated-value {
+  padding: 0.75rem;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  color: #4a90e2;
+  font-weight: 500;
+  min-width: 150px;
+  text-align: center;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+select {
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  font-size: 1rem;
+  min-width: 150px;
+  flex: 1;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1.2em;
+  padding-right: 2.5rem;
+}
+
+select option {
+  background: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="datetime-local"]:focus,
+select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit {
+  color: inherit;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+#buy-shares {
+  background: linear-gradient(135deg, #50c878 0%, #3cb371 100%);
+}
+
+#sell-shares {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+}
+
+.timeline-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.timeline-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #4a90e2;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.timeline-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.timeline-item:hover .transaction-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.timeline-item.income {
+  border-left-color: #50c878;
+}
+
+.timeline-item.expense {
+  border-left-color: #ff6b6b;
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.25rem;
+}
+
+.timeline-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.timeline-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.timeline-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.timeline-type {
+  background: rgba(74, 144, 226, 0.2);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.timeline-type.gain {
+  background: rgba(80, 200, 120, 0.2);
+}
+
+.timeline-type.loss {
+  background: rgba(255, 107, 107, 0.2);
+}
+
+.timeline-amount {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.timeline-amount.income {
+  color: #50c878;
+}
+
+.timeline-amount.expense {
+  color: #ff6b6b;
+}
+
+.timeline-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.timeline-balance {
+  font-size: 0.75rem;
+  color: rgba(74, 144, 226, 0.8);
+}
+
+.investor-impact {
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.investor-impact.gain {
+  background: rgba(80, 200, 120, 0.08);
+  color: #50c878;
+  border-left: 2px solid #50c878;
+}
+
+.investor-impact.loss {
+  background: rgba(255, 107, 107, 0.08);
+  color: #ff6b6b;
+  border-left: 2px solid #ff6b6b;
+}
+
+.transaction-actions {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.transaction-actions button {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.transaction-actions button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.edit-btn {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%) !important;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+}
+
+.modal-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+#save-edit {
+  background: linear-gradient(135deg, #50c878 0%, #3cb371 100%);
+}
+
+#cancel-edit {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .ownership-section {
+    grid-template-columns: 1fr;
+  }
+
+  .input-group, .transaction-inputs {
+    flex-direction: column;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="datetime-local"],
+  select {
+    width: 100%;
+  }
+
+  .timeline-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .timeline-right {
+    align-items: flex-start;
+    margin-top: 0.5rem;
+  }
+
+  .transaction-actions {
+    opacity: 1;
+    pointer-events: auto;
+    position: static;
+    transform: none;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #f5f5f5;
+  }
+
+  section {
+    background: white;
+    border-color: #e0e0e0;
+  }
+
+  th {
+    background: rgba(74, 144, 226, 0.1);
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="datetime-local"],
+  select {
+    border-color: #ccc;
+    background: white;
+    color: #213547;
+  }
+
+  select option {
+    background: white;
+    color: #213547;
+  }
+
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(33,53,71,0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  }
+
+  table td, table th {
+    border-bottom-color: #e0e0e0;
+  }
+
+  .timeline-item {
+    background: white;
+  }
+
+  .timeline-date {
+    color: #666;
+  }
+
+  .timeline-description {
+    color: #333;
+  }
+}

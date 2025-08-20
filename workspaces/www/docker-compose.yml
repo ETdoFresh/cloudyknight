@@ -25,6 +25,17 @@ services:
       - traefik.http.routers.www.tls.certresolver=letsencrypt
       - traefik.http.routers.www.priority=1
       - traefik.http.services.www.loadbalancer.server.port=5173
+      
+      # Redirect /www to root
+      - traefik.http.routers.www-redirect.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`) && (Path(`/www`) || PathPrefix(`/www/`))
+      - traefik.http.routers.www-redirect.entrypoints=websecure
+      - traefik.http.routers.www-redirect.tls=true
+      - traefik.http.routers.www-redirect.tls.certresolver=letsencrypt
+      - traefik.http.routers.www-redirect.priority=20
+      - traefik.http.middlewares.www-to-root.redirectregex.regex=^https?://([^/]+)/www/?(.*)$$
+      - traefik.http.middlewares.www-to-root.redirectregex.replacement=https://$$1/$$2
+      - traefik.http.middlewares.www-to-root.redirectregex.permanent=true
+      - traefik.http.routers.www-redirect.middlewares=www-to-root
 
 networks:
   traefik-network:
