@@ -117,8 +117,8 @@ body::before {
 
 .workspaces-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.5rem;
     animation: fadeInUp 0.8s ease-out 0.2s backwards;
     flex: 1;
 }
@@ -126,7 +126,7 @@ body::before {
 .workspace-card {
     background: var(--card-background);
     border-radius: var(--border-radius);
-    padding: 2.5rem;
+    padding: 2rem;
     text-decoration: none;
     color: inherit;
     box-shadow: var(--card-shadow);
@@ -139,6 +139,7 @@ body::before {
     text-align: center;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.95);
+    min-height: 320px;
 }
 
 /* Animated top border on hover */
@@ -173,13 +174,13 @@ body::before {
 }
 
 .workspace-icon {
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     border-radius: 50%;
     box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
@@ -193,17 +194,17 @@ body::before {
 }
 
 .workspace-card h3 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     color: var(--text-primary);
 }
 
 .workspace-card p {
     color: var(--text-secondary);
-    line-height: 1.6;
-    font-size: 0.95rem;
-    margin-bottom: 1.5rem;
+    line-height: 1.5;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
     flex-grow: 1;
 }
 
@@ -309,7 +310,36 @@ body::before {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+/* Extra large screens - 5 columns */
+@media (min-width: 1600px) {
+    .workspace-container {
+        max-width: 1600px;
+    }
+}
+
+/* Large screens - 4 columns */
+@media (max-width: 1400px) {
+    .workspaces-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Medium screens - 3 columns */
+@media (max-width: 1200px) {
+    .workspaces-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Small screens - 2 columns */
+@media (max-width: 900px) {
+    .workspaces-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile screens - 1 column */
+@media (max-width: 600px) {
     .workspace-header h1 {
         font-size: 2.5rem;
     }
@@ -334,6 +364,7 @@ body::before {
     
     .workspace-card {
         padding: 2rem;
+        min-height: auto;
     }
     
     .workspace-icon {

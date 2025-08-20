@@ -11,6 +11,7 @@ services:
       - "8080:8080"  # Traefik dashboard and API
       - "9000:9000"  # MinIO S3 API
       - "9001:9001"  # MinIO Console
+      - "9443:9443"  # Portainer
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker socket for container discovery
       - ./certificates:/certificates  # SSL certificates storage
@@ -27,6 +28,7 @@ services:
       - "--entrypoints.traefik.address=:8080"  # Dashboard entrypoint
       - "--entrypoints.minio-api.address=:9000"  # MinIO API entrypoint
       - "--entrypoints.minio-console.address=:9001"  # MinIO Console entrypoint
+      - "--entrypoints.portainer.address=:9443"  # Portainer entrypoint
       
       # Enable HTTPS on dashboard entrypoint
       - "--entrypoints.traefik.http.tls=true"
@@ -41,6 +43,11 @@ services:
       - "--entrypoints.minio-console.http.tls=true"
       - "--entrypoints.minio-console.http.tls.certresolver=letsencrypt"
       - "--entrypoints.minio-console.http.tls.domains[0].main=workspaces.etdofresh.com"
+      
+      # Enable HTTPS on Portainer entrypoint
+      - "--entrypoints.portainer.http.tls=true"
+      - "--entrypoints.portainer.http.tls.certresolver=letsencrypt"
+      - "--entrypoints.portainer.http.tls.domains[0].main=workspaces.etdofresh.com"
       
       # Global HTTP -> HTTPS redirect
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"

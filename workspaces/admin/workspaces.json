@@ -29,8 +29,128 @@
       "status": "active",
       "type": "static",
       "created": "2025-08-20T05:02:28.786Z"
+    },
+    {
+      "id": "clock",
+      "slug": "clock",
+      "name": "Clock",
+      "icon": "🕐",
+      "description": "Digital and analog clock display with theme toggle",
+      "status": "active",
+      "type": "nodejs",
+      "created": "2025-08-20T05:20:00.000Z"
+    },
+    {
+      "id": "portainer",
+      "slug": "portainer",
+      "name": "Portainer",
+      "icon": "🐳",
+      "description": "Docker container management and orchestration platform",
+      "status": "active",
+      "type": "external",
+      "created": "2025-08-20T05:30:00.000Z"
+    },
+    {
+      "id": "traefik",
+      "slug": "traefik",
+      "name": "Traefik",
+      "icon": "🌍",
+      "description": "Reverse proxy and load balancer with automatic SSL",
+      "status": "active",
+      "type": "external",
+      "created": "2025-08-20T05:30:00.000Z"
+    },
+    {
+      "id": "minio",
+      "slug": "minio",
+      "name": "MinIO",
+      "icon": "🗂️",
+      "description": "S3-compatible object storage server",
+      "status": "active",
+      "type": "external",
+      "created": "2025-08-20T05:30:00.000Z"
+    },
+    {
+      "id": "api",
+      "slug": "api",
+      "name": "API",
+      "icon": "⚡",
+      "description": "Backend API services and endpoints",
+      "status": "inactive",
+      "type": "nodejs",
+      "created": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "blog",
+      "slug": "blog",
+      "name": "Blog",
+      "icon": "📝",
+      "description": "Blog and content management system",
+      "status": "inactive",
+      "type": "static",
+      "created": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "docs",
+      "slug": "docs",
+      "name": "Documentation",
+      "icon": "📚",
+      "description": "Technical documentation and guides",
+      "status": "inactive",
+      "type": "static",
+      "created": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "analytics",
+      "slug": "analytics",
+      "name": "Analytics",
+      "icon": "📊",
+      "description": "Monitor and analyze workspace metrics",
+      "status": "inactive",
+      "type": "nodejs",
+      "created": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "database",
+      "slug": "database",
+      "name": "Database",
+      "icon": "🗄️",
+      "description": "Database management and exploration",
+      "status": "inactive",
+      "type": "nodejs",
+      "created": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "storage",
+      "slug": "storage",
+      "name": "Storage",
+      "icon": "💾",
+      "description": "File storage and media management",
+      "status": "inactive",
+      "type": "nodejs",
+      "created": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "monitor",
+      "slug": "monitor",
+      "name": "Monitor",
+      "icon": "🔍",
+      "description": "System monitoring and health checks",
+      "status": "inactive",
+      "type": "nodejs",
+      "created": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "settings",
+      "slug": "settings",
+      "name": "Settings",
+      "icon": "⚙️",
+      "description": "Configure your workspace environment",
+      "status": "inactive",
+      "type": "nodejs",
+      "created": "2025-08-20T00:00:00.000Z"
     }
   ],
-  "lastModified": "2025-08-20T05:02:28.787Z",
+  "lastModified": "2025-08-20T05:30:00.000Z",
   "version": "1.0.0"
 }
