@@ -26,9 +26,16 @@ services:
       - traefik.http.routers.clock.priority=10
       - traefik.http.services.clock.loadbalancer.server.port=5173
       
+      # Redirect /clock to /clock/ (add trailing slash)
+      - traefik.http.middlewares.clock-redirect.redirectregex.regex=^https?://([^/]+)/clock$$
+      - traefik.http.middlewares.clock-redirect.redirectregex.replacement=https://$$1/clock/
+      - traefik.http.middlewares.clock-redirect.redirectregex.permanent=true
+      
       # Strip the /clock prefix before forwarding to the service
       - traefik.http.middlewares.clock-stripprefix.stripprefix.prefixes=/clock
-      - traefik.http.routers.clock.middlewares=clock-stripprefix
+      
+      # Apply middlewares only to main clock router
+      - traefik.http.routers.clock.middlewares=clock-redirect,clock-stripprefix
 
 networks:
   traefik-network:

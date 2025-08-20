@@ -9,9 +9,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>Clock Workspace</h1>
-            <div class="theme-toggle">
-                <button id="themeToggle" aria-label="Toggle theme">
+            <div class="header-left">
+                <a href="/" class="back-button" aria-label="Back to workspaces">
+                    <span>←</span>
+                </a>
+                <h1>Clock Workspace</h1>
+            </div>
+            <div class="header-right">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
                     <span class="theme-icon">🌙</span>
                 </button>
             </div>
@@ -28,9 +33,25 @@
                     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="100" cy="100" r="98" class="clock-face"/>
                         <g id="clockNumbers"></g>
-                        <line x1="100" y1="100" x2="100" y2="40" class="hand hour-hand" id="hourHand"/>
-                        <line x1="100" y1="100" x2="100" y2="25" class="hand minute-hand" id="minuteHand"/>
-                        <line x1="100" y1="100" x2="100" y2="20" class="hand second-hand" id="secondHand"/>
+                        
+                        <!-- Hour hand -->
+                        <line x1="100" y1="100" x2="100" y2="50" 
+                              class="hand hour-hand" 
+                              id="hourHand"
+                              transform="rotate(0 100 100)" />
+                        
+                        <!-- Minute hand -->
+                        <line x1="100" y1="100" x2="100" y2="30" 
+                              class="hand minute-hand" 
+                              id="minuteHand"
+                              transform="rotate(0 100 100)" />
+                        
+                        <!-- Second hand -->
+                        <line x1="100" y1="100" x2="100" y2="25" 
+                              class="hand second-hand" 
+                              id="secondHand"
+                              transform="rotate(0 100 100)" />
+                        
                         <circle cx="100" cy="100" r="4" class="center-dot"/>
                     </svg>
                 </div>
@@ -62,10 +83,12 @@
                     <div class="feature-card">
                         <h3>Timer</h3>
                         <div class="timer">
-                            <input type="number" id="timerMinutes" min="0" max="59" value="5" placeholder="Min">
-                            <span>:</span>
-                            <input type="number" id="timerSeconds" min="0" max="59" value="0" placeholder="Sec">
                             <div class="timer-display" id="timerDisplay">05:00</div>
+                            <div class="timer-inputs">
+                                <input type="number" id="timerMinutes" min="0" max="59" value="5" placeholder="Min">
+                                <span class="timer-separator">:</span>
+                                <input type="number" id="timerSeconds" min="0" max="59" value="0" placeholder="Sec">
+                            </div>
                             <div class="timer-controls">
                                 <button id="startTimer">Start</button>
                                 <button id="resetTimer">Reset</button>

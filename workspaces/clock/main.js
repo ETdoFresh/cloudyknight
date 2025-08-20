@@ -5,7 +5,9 @@ class ClockApp {
         this.stopwatchTime = 0;
         this.timerInterval = null;
         this.timerTime = 0;
-        this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+        // Use shared workspace theme setting
+        const savedTheme = localStorage.getItem('workspace-theme');
+        this.isDarkMode = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
         
         this.init();
     }
@@ -34,7 +36,7 @@ class ClockApp {
             this.isDarkMode = !this.isDarkMode;
             document.body.classList.toggle('dark-mode');
             themeToggle.querySelector('.theme-icon').textContent = this.isDarkMode ? '☀️' : '🌙';
-            localStorage.setItem('darkMode', this.isDarkMode);
+            localStorage.setItem('workspace-theme', this.isDarkMode ? 'dark' : 'light');
         });
     }
 
@@ -112,10 +114,12 @@ class ClockApp {
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
         
-        const hourAngle = (hours * 30) + (minutes * 0.5) - 90;
-        const minuteAngle = (minutes * 6) + (seconds * 0.1) - 90;
-        const secondAngle = seconds * 6 - 90;
+        // Calculate angles with no offset
+        const hourAngle = (hours * 30) + (minutes * 0.5);
+        const minuteAngle = (minutes * 6) + (seconds * 0.1);
+        const secondAngle = seconds * 6;
         
+        // Apply rotation using setAttribute with explicit center point
         document.getElementById('hourHand').setAttribute('transform', `rotate(${hourAngle} 100 100)`);
         document.getElementById('minuteHand').setAttribute('transform', `rotate(${minuteAngle} 100 100)`);
         document.getElementById('secondHand').setAttribute('transform', `rotate(${secondAngle} 100 100)`);

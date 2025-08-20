@@ -28,16 +28,18 @@ class WorkspaceAdmin {
         this.updateStatistics();
     }
 
-    // Initialize theme from localStorage or system preference
+    // Initialize theme from shared workspace theme setting
     initTheme() {
-        const savedTheme = localStorage.getItem('admin-theme');
+        const savedTheme = localStorage.getItem('workspace-theme');
         
-        if (savedTheme) {
-            // Ensure body has the saved theme class
-            document.body.classList.add(savedTheme);
-            this.updateThemeIcon(savedTheme === 'dark-theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            this.updateThemeIcon(true);
+        } else if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            this.updateThemeIcon(false);
         } else {
-            // Use system preference
+            // Use system preference if no saved theme
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (prefersDark) {
                 document.body.classList.add('dark-theme');
@@ -471,7 +473,7 @@ class WorkspaceAdmin {
         this.showToast('Configuration exported', 'success');
     }
 
-    // Theme toggle with localStorage persistence
+    // Theme toggle with shared workspace theme persistence
     toggleTheme() {
         const isDark = document.body.classList.contains('dark-theme');
         
@@ -479,13 +481,13 @@ class WorkspaceAdmin {
             // Switch to light theme
             document.body.classList.remove('dark-theme');
             document.body.classList.add('light-theme');
-            localStorage.setItem('admin-theme', 'light-theme');
+            localStorage.setItem('workspace-theme', 'light');
             this.updateThemeIcon(false);
         } else {
             // Switch to dark theme
             document.body.classList.remove('light-theme');
             document.body.classList.add('dark-theme');
-            localStorage.setItem('admin-theme', 'dark-theme');
+            localStorage.setItem('workspace-theme', 'dark');
             this.updateThemeIcon(true);
         }
         

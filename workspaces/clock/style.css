@@ -13,15 +13,15 @@
 }
 
 body.dark-mode {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #2d2d2d;
-    --bg-tertiary: #3a3a3a;
-    --text-primary: #f0f0f0;
-    --text-secondary: #b0b0b0;
-    --border-color: #4a4a4a;
-    --accent-color: #4a9eff;
-    --success-color: #52c41a;
-    --danger-color: #ff4d4f;
+    --bg-primary: #1a202c;
+    --bg-secondary: #374151;
+    --bg-tertiary: #4b5563;
+    --text-primary: #f7fafc;
+    --text-secondary: #e2e8f0;
+    --border-color: #4b5563;
+    --accent-color: #667eea;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
     --shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
@@ -40,6 +40,10 @@ body {
     min-height: 100vh;
 }
 
+body.dark-mode {
+    background: linear-gradient(135deg, #1a202c, #2d3748);
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -55,30 +59,71 @@ header {
     border-bottom: 2px solid var(--border-color);
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--accent-color);
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.back-button:hover {
+    transform: scale(1.1);
+    background: #5a67d8;
+    box-shadow: var(--shadow);
+}
+
+body.dark-mode .back-button {
+    background: var(--accent-color);
+}
+
+body.dark-mode .back-button:hover {
+    background: #805ad5;
+}
+
 h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--accent-color), #667eea);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    margin: 0;
 }
 
-.theme-toggle button {
+.theme-toggle {
     background: var(--bg-secondary);
     border: 2px solid var(--border-color);
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     transition: all 0.3s ease;
 }
 
-.theme-toggle button:hover {
+.theme-toggle:hover {
     transform: scale(1.1);
     box-shadow: var(--shadow);
 }
@@ -143,21 +188,23 @@ h1 {
 .hand {
     stroke: var(--text-primary);
     stroke-linecap: round;
-    transform-origin: center;
     transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .hour-hand {
     stroke-width: 4;
+    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .minute-hand {
     stroke-width: 3;
+    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .second-hand {
     stroke: var(--danger-color);
     stroke-width: 2;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.6, 1);
 }
 
 .center-dot {
@@ -216,13 +263,22 @@ h1 {
     font-size: 1.3rem;
 }
 
+.stopwatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0 10px;
+}
+
 .stopwatch-display,
 .timer-display {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-family: 'Courier New', monospace;
     text-align: center;
-    margin: 20px 0;
+    margin: 10px auto 5px;
     color: var(--accent-color);
+    font-weight: 300;
 }
 
 .stopwatch-controls,
@@ -230,6 +286,7 @@ h1 {
     display: flex;
     gap: 10px;
     justify-content: center;
+    margin-top: 10px;
 }
 
 button {
@@ -253,28 +310,38 @@ button:active {
     transform: translateY(0);
 }
 
+.timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.timer-inputs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 8px 0;
+}
+
 .timer input {
-    width: 60px;
-    padding: 8px;
+    width: 70px;
+    padding: 10px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
     background: var(--bg-tertiary);
     color: var(--text-primary);
     text-align: center;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    font-family: 'Courier New', monospace;
 }
 
-.timer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.timer span {
+.timer-separator {
     font-size: 1.5rem;
     color: var(--text-secondary);
+    font-weight: bold;
 }
 
 .world-clocks {
@@ -320,7 +387,19 @@ footer {
     }
     
     h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
+    }
+    
+    .back-button {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .theme-toggle {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
     }
     
     .time {
