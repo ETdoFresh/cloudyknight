@@ -1,0 +1,63 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    # No ports exposed - all access through Traefik
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_DOMAIN: ${DOMAIN:-workspaces.etdofresh.com}
+      # Set URLs for HTTPS access through Traefik
+      MINIO_BROWSER_REDIRECT_URL: https://${DOMAIN:-workspaces.etdofresh.com}:9001
+      MINIO_SERVER_URL: https://${DOMAIN:-workspaces.etdofresh.com}:9000
+      # Allow CORS for browser access
+      MINIO_API_CORS_ALLOW_ORIGIN: "*"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address "0.0.0.0:9001" --address "0.0.0.0:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - traefik-network
+    restart: unless-stopped
+    labels:
+      # Enable Traefik
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      
+      # MinIO API Configuration on port 9000 (HTTPS)
+      - "traefik.http.routers.minio-api.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`)"
+      - "traefik.http.routers.minio-api.entrypoints=minio-api"
+      - "traefik.http.routers.minio-api.service=minio-api"
+      - "traefik.http.services.minio-api.loadbalancer.server.port=9000"
+      
+      # MinIO Console Configuration on port 9001 (HTTPS)
+      - "traefik.http.routers.minio-console.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`)"
+      - "traefik.http.routers.minio-console.entrypoints=minio-console"
+      - "traefik.http.routers.minio-console.service=minio-console"
+      - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
+      
+      # Optional: Redirect from /minio to port 9001
+      - "traefik.http.routers.minio-redirect.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`) && Path(`/minio`)"
+      - "traefik.http.routers.minio-redirect.entrypoints=websecure"
+      - "traefik.http.routers.minio-redirect.tls=true"
+      - "traefik.http.routers.minio-redirect.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-redirect.middlewares=minio-redirect-middleware"
+      - "traefik.http.routers.minio-redirect.service=minio-console"
+      
+      # Redirect middleware to HTTPS port 9001
+      - "traefik.http.middlewares.minio-redirect-middleware.redirectregex.regex=^https?://([^/]+)/minio$$"
+      - "traefik.http.middlewares.minio-redirect-middleware.redirectregex.replacement=https://$$1:9001/"
+      - "traefik.http.middlewares.minio-redirect-middleware.redirectregex.permanent=true"
+
+volumes:
+  minio_data:
+    external: true
+    name: cloudyknight_minio_data
+
+networks:
+  traefik-network:
+    external: true

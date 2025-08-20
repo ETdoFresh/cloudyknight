@@ -1,0 +1,93 @@
+services:
+  traefik:
+    image: traefik:v3.3.7
+    container_name: traefik
+    restart: unless-stopped
+    networks:
+      - traefik-network
+    ports:
+      - "80:80"      # HTTP (required for Let's Encrypt certificate validation)
+      - "443:443"    # HTTPS websecure entrypoint
+      - "8080:8080"  # Traefik dashboard and API
+      - "9000:9000"  # MinIO S3 API
+      - "9001:9001"  # MinIO Console
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker socket for container discovery
+      - ./certificates:/certificates  # SSL certificates storage
+      - ./data:/etc/traefik  # Traefik configuration
+    command:
+      # Docker provider configuration
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"  # Don't expose containers by default
+      - "--providers.docker.network=traefik-network"
+      
+      # Entry points configuration
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.traefik.address=:8080"  # Dashboard entrypoint
+      - "--entrypoints.minio-api.address=:9000"  # MinIO API entrypoint
+      - "--entrypoints.minio-console.address=:9001"  # MinIO Console entrypoint
+      
+      # Enable HTTPS on dashboard entrypoint
+      - "--entrypoints.traefik.http.tls=true"
+      - "--entrypoints.traefik.http.tls.certresolver=letsencrypt"
+      - "--entrypoints.traefik.http.tls.domains[0].main=workspaces.etdofresh.com"
+      
+      # Enable HTTPS on MinIO entrypoints
+      - "--entrypoints.minio-api.http.tls=true"
+      - "--entrypoints.minio-api.http.tls.certresolver=letsencrypt"
+      - "--entrypoints.minio-api.http.tls.domains[0].main=workspaces.etdofresh.com"
+      
+      - "--entrypoints.minio-console.http.tls=true"
+      - "--entrypoints.minio-console.http.tls.certresolver=letsencrypt"
+      - "--entrypoints.minio-console.http.tls.domains[0].main=workspaces.etdofresh.com"
+      
+      # Global HTTP -> HTTPS redirect
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      
+      # SSL Configuration
+      - "--serversTransport.insecureSkipVerify=true"
+      
+      # Let's Encrypt configuration
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@etdofresh.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/certificates/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+      
+      # Enable dashboard with secure configuration
+      - "--api.dashboard=true"
+      - "--api.insecure=true"  # Allow direct access on port 8080
+      
+      # Access logs
+      - "--accesslog=true"
+      - "--accesslog.filepath=/etc/traefik/access.log"
+      - "--accesslog.bufferingsize=100"
+      - "--log.level=INFO"
+
+    labels:
+      - "traefik.enable=true"
+      
+      # Dashboard access on port 8080
+      - "traefik.http.routers.dashboard.rule=Host(`workspaces.etdofresh.com`)"
+      - "traefik.http.routers.dashboard.entrypoints=traefik"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      
+      # Redirect from /traefik to port 8080
+      - "traefik.http.routers.traefik-redirect.rule=Host(`workspaces.etdofresh.com`) && Path(`/traefik`)"
+      - "traefik.http.routers.traefik-redirect.entrypoints=websecure"
+      - "traefik.http.routers.traefik-redirect.tls=true"
+      - "traefik.http.routers.traefik-redirect.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-redirect.middlewares=traefik-redirect-middleware"
+      - "traefik.http.routers.traefik-redirect.priority=100"
+      
+      # Redirect middleware to port 8080
+      - "traefik.http.middlewares.traefik-redirect-middleware.redirectregex.regex=^https?://([^/]+)/traefik/?$$"
+      - "traefik.http.middlewares.traefik-redirect-middleware.redirectregex.replacement=https://$$1:8080/dashboard/"
+      - "traefik.http.middlewares.traefik-redirect-middleware.redirectregex.permanent=true"
+
+networks:
+  traefik-network:
+    external: true
