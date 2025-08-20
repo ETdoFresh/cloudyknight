@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Sync Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        body.dark {
+            background: #1a202c;
+            color: #f7fafc;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        body.dark .status {
+            border-color: #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Theme Sync Test</h1>
+        <div class="status">
+            <h3>Current Theme Settings:</h3>
+            <p>workspace-theme: <span id="workspace-theme">-</span></p>
+            <p>darkMode (old clock): <span id="darkMode">-</span></p>
+            <p>admin-theme (old admin): <span id="admin-theme">-</span></p>
+        </div>
+        
+        <div>
+            <button onclick="setTheme('light')">Set Light Theme</button>
+            <button onclick="setTheme('dark')">Set Dark Theme</button>
+            <button onclick="clearAll()">Clear All</button>
+            <button onclick="refresh()">Refresh Status</button>
+        </div>
+        
+        <div class="status">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click "Set Dark Theme" or "Set Light Theme"</li>
+                <li>Open <a href="/admin/" target="_blank">Admin Panel</a> in a new tab</li>
+                <li>Open <a href="/clock/" target="_blank">Clock Workspace</a> in a new tab</li>
+                <li>Both should have the same theme!</li>
+                <li>Toggle theme in either workspace and refresh the other - they should stay in sync</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function refresh() {
+            document.getElementById('workspace-theme').textContent = localStorage.getItem('workspace-theme') || 'not set';
+            document.getElementById('darkMode').textContent = localStorage.getItem('darkMode') || 'not set';
+            document.getElementById('admin-theme').textContent = localStorage.getItem('admin-theme') || 'not set';
+            
+            // Apply theme to this page
+            const theme = localStorage.getItem('workspace-theme');
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+            }
+        }
+        
+        function setTheme(theme) {
+            localStorage.setItem('workspace-theme', theme);
+            // Clean up old keys
+            localStorage.removeItem('darkMode');
+            localStorage.removeItem('admin-theme');
+            refresh();
+            alert(`Theme set to ${theme}. Now open Admin and Clock workspaces to see them in sync!`);
+        }
+        
+        function clearAll() {
+            localStorage.removeItem('workspace-theme');
+            localStorage.removeItem('darkMode');
+            localStorage.removeItem('admin-theme');
+            refresh();
+        }
+        
+        // Initial load
+        refresh();
+        
+        // Listen for storage changes from other tabs
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'workspace-theme') {
+                refresh();
+            }
+        });
+    </script>
+</body>
+</html>

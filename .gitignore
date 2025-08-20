@@ -43,3 +43,10 @@ ENV/
 dist/
 build/
 out/
+
+# Security - SSL certificates and keys
+traefik/certificates/
+*.pem
+*.key
+*.crt
+*.cer

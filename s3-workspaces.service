@@ -1,0 +1,15 @@
+[Unit]
+Description=Mount MinIO S3 bucket for CloudyKnight workspaces
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User=root
+ExecStart=/usr/bin/s3fs workspaces /workspaces -o passwd_file=/home/claude/.passwd-s3fs -o url=https://workspaces.etdofresh.com:9000 -o use_path_request_style -o allow_other -o umask=0022 -o no_check_certificate
+ExecStop=/bin/umount /workspaces
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

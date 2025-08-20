@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  test:
+    container_name: test
+    image: nginx:alpine
+    volumes:
+      - .:/usr/share/nginx/html:ro
+    restart: unless-stopped
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
+      - "traefik.http.routers.test.rule=Host(`workspaces.etdofresh.com`) && PathPrefix(`/test`)"
+      - "traefik.http.routers.test.entrypoints=websecure"
+      - "traefik.http.routers.test.tls=true"
+      - "traefik.http.routers.test.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.test.priority=50"
+      - "traefik.http.middlewares.test-stripprefix.stripprefix.prefixes=/test"
+      - "traefik.http.routers.test.middlewares=test-stripprefix"
+      - "traefik.http.services.test.loadbalancer.server.port=80"
+
+networks:
+  traefik-network:
+    external: true

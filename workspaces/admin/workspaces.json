@@ -81,6 +81,16 @@
       "created": "2025-08-20T19:00:00.000Z"
     },
     {
+      "id": "file-browser",
+      "slug": "file-browser",
+      "name": "File Browser",
+      "icon": "📂",
+      "description": "Browse and manage workspace files and directories",
+      "status": "active",
+      "type": "nodejs",
+      "created": "2025-08-20T19:30:00.000Z"
+    },
+    {
       "id": "api",
       "slug": "api",
       "name": "API",
@@ -161,6 +171,6 @@
       "created": "2025-08-20T00:00:00.000Z"
     }
   ],
-  "lastModified": "2025-08-20T19:20:00.000Z",
+  "lastModified": "2025-08-20T19:31:00.000Z",
   "version": "1.0.0"
 }
