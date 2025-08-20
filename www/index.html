@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETdoFresh Workspaces</title>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>ETdoFresh Workspaces</h1>
+            <div class="status">
+                <span class="status-indicator"></span>
+                <span>System Online</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="welcome-card">
+            <h2>Welcome to ETdoFresh Workspaces</h2>
+            <p>
+                This is your centralized workspace management system. Each workspace is an isolated Docker container
+                that can run different types of applications - from static websites to dynamic Node.js applications.
+            </p>
+            <p>
+                <strong>Current Status:</strong> Workspaces are loading...
+            </p>
+        </div>
+
+        <section id="workspaces">
+            <h2 style="color: white; margin-bottom: 1rem;">Available Workspaces</h2>
+            <div class="workspace-grid" id="workspace-grid">
+                <!-- Workspaces will be loaded here by JavaScript -->
+                <div class="placeholder">
+                    <div class="loading"></div>
+                    <h3>Loading workspaces...</h3>
+                    <p>Please wait while we scan for available workspaces.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 ETdoFresh Workspace • Powered by Docker & Traefik</p>
+    </footer>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>

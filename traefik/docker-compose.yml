@@ -70,11 +70,6 @@ services:
     labels:
       - "traefik.enable=true"
       
-      # Dashboard access on port 8080
-      - "traefik.http.routers.dashboard.rule=Host(`workspaces.etdofresh.com`)"
-      - "traefik.http.routers.dashboard.entrypoints=traefik"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      
       # Redirect from /traefik to port 8080
       - "traefik.http.routers.traefik-redirect.rule=Host(`workspaces.etdofresh.com`) && Path(`/traefik`)"
       - "traefik.http.routers.traefik-redirect.entrypoints=websecure"

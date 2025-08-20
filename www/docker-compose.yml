@@ -1,0 +1,30 @@
+services:
+  # WWW - serves workspace listing with hot reloading via Vite
+  www:
+    image: node:20-alpine
+    container_name: www
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules  # Anonymous volume for node_modules
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - NODE_ENV=development
+      - VITE_HOST=0.0.0.0
+    networks:
+      - traefik-network
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      
+      # Simple routing configuration
+      - traefik.http.routers.www.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`)
+      - traefik.http.routers.www.entrypoints=websecure
+      - traefik.http.routers.www.tls=true
+      - traefik.http.routers.www.tls.certresolver=letsencrypt
+      - traefik.http.services.www.loadbalancer.server.port=5173
+
+networks:
+  traefik-network:
+    external: true
