@@ -1,15 +1,7 @@
-# Workspaces are stored in S3, not git
-/workspaces/
-workspaces/
-
-# MinIO data
-minio_data/
-
 # Environment files
 .env
 .env.local
-.env.backup
-.env.multi-backup
+.env.*.local
 
 # Logs
 *.log
@@ -29,3 +21,25 @@ Thumbs.db
 # Temporary files
 *.tmp
 tmp/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+ENV/
+
+# Docker
+*.pid
+
+# Build outputs
+dist/
+build/
+out/
