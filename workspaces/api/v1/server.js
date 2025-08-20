@@ -17,9 +17,9 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Paths
-const WORKSPACES_ROOT = path.join(__dirname, '../../');
-const WORKSPACES_JSON = path.join(__dirname, '../../admin/workspaces.json');
+// Paths - Use absolute paths that work in container
+const WORKSPACES_ROOT = '/workspaces';
+const WORKSPACES_JSON = '/workspaces/admin/workspaces.json';
 
 // Helper functions
 async function loadWorkspaces() {
@@ -60,7 +60,7 @@ function getDockerCompose(slug, type) {
 
 services:
   ${slug}:
-    container_name: workspace_${slug}
+    container_name: ${slug}
     image: node:18-alpine
     working_dir: /app
     volumes:
@@ -68,90 +68,110 @@ services:
     command: npx vite --host 0.0.0.0 --port 3000
     restart: unless-stopped
     networks:
-      - traefik_network
+      - traefik-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
       - "traefik.http.routers.${slug}.rule=Host(\`workspaces.etdofresh.com\`) && PathPrefix(\`/${slug}\`)"
+      - "traefik.http.routers.${slug}.entrypoints=websecure"
+      - "traefik.http.routers.${slug}.tls=true"
+      - "traefik.http.routers.${slug}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${slug}.priority=50"
       - "traefik.http.services.${slug}.loadbalancer.server.port=3000"
 
 networks:
-  traefik_network:
+  traefik-network:
     external: true`,
 
         static: `version: '3.8'
 
 services:
   ${slug}:
-    container_name: workspace_${slug}
+    container_name: ${slug}
     image: nginx:alpine
     volumes:
       - .:/usr/share/nginx/html:ro
     restart: unless-stopped
     networks:
-      - traefik_network
+      - traefik-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
       - "traefik.http.routers.${slug}.rule=Host(\`workspaces.etdofresh.com\`) && PathPrefix(\`/${slug}\`)"
+      - "traefik.http.routers.${slug}.entrypoints=websecure"
+      - "traefik.http.routers.${slug}.tls=true"
+      - "traefik.http.routers.${slug}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${slug}.priority=50"
       - "traefik.http.services.${slug}.loadbalancer.server.port=80"
 
 networks:
-  traefik_network:
+  traefik-network:
     external: true`,
 
         python: `version: '3.8'
 
 services:
   ${slug}:
-    container_name: workspace_${slug}
+    container_name: ${slug}
     build: .
     volumes:
       - .:/app
     restart: unless-stopped
     networks:
-      - traefik_network
+      - traefik-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
       - "traefik.http.routers.${slug}.rule=Host(\`workspaces.etdofresh.com\`) && PathPrefix(\`/${slug}\`)"
+      - "traefik.http.routers.${slug}.entrypoints=websecure"
+      - "traefik.http.routers.${slug}.tls=true"
+      - "traefik.http.routers.${slug}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${slug}.priority=50"
       - "traefik.http.services.${slug}.loadbalancer.server.port=5000"
 
 networks:
-  traefik_network:
+  traefik-network:
     external: true`,
 
         php: `version: '3.8'
 
 services:
   ${slug}:
-    container_name: workspace_${slug}
+    container_name: ${slug}
     image: php:8.2-apache
     volumes:
       - .:/var/www/html
     restart: unless-stopped
     networks:
-      - traefik_network
+      - traefik-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-network"
       - "traefik.http.routers.${slug}.rule=Host(\`workspaces.etdofresh.com\`) && PathPrefix(\`/${slug}\`)"
+      - "traefik.http.routers.${slug}.entrypoints=websecure"
+      - "traefik.http.routers.${slug}.tls=true"
+      - "traefik.http.routers.${slug}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${slug}.priority=50"
       - "traefik.http.services.${slug}.loadbalancer.server.port=80"
 
 networks:
-  traefik_network:
+  traefik-network:
     external: true`,
 
         custom: `version: '3.8'
 
 services:
   ${slug}:
-    container_name: workspace_${slug}
+    container_name: ${slug}
     # Configure your custom image and settings here
     image: alpine:latest
     command: tail -f /dev/null
     restart: unless-stopped
     networks:
-      - traefik_network
+      - traefik-network
 
 networks:
-  traefik_network:
+  traefik-network:
     external: true`
     };
 
@@ -503,6 +523,14 @@ router.post('/workspaces/:slug/docker/:action', async (req, res) => {
         // Check if workspace exists
         await fs.access(workspacePath);
         
+        // Check if docker-compose.yml exists
+        const dockerComposePath = path.join(workspacePath, 'docker-compose.yml');
+        try {
+            await fs.access(dockerComposePath);
+        } catch {
+            return res.status(404).json({ error: `No docker-compose.yml found for workspace ${slug}` });
+        }
+        
         let command;
         switch (action) {
             case 'start':
@@ -512,7 +540,8 @@ router.post('/workspaces/:slug/docker/:action', async (req, res) => {
                 command = `cd ${workspacePath} && docker-compose down`;
                 break;
             case 'restart':
-                command = `cd ${workspacePath} && docker-compose down && docker-compose up -d`;
+                // Use || true to prevent failure if container doesn't exist
+                command = `cd ${workspacePath} && docker-compose down 2>/dev/null || true && docker-compose up -d`;
                 break;
             default:
                 return res.status(400).json({ error: 'Invalid action' });

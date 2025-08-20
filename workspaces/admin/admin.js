@@ -10,8 +10,16 @@ class WorkspaceAdmin {
     }
     
     async initAsync() {
-        await this.loadWorkspaces();
-        this.init();
+        try {
+            await this.loadWorkspaces();
+            this.init();
+        } catch (error) {
+            console.error('Failed to initialize workspace admin:', error);
+            this.showToast('Failed to load workspaces. Please refresh the page.', 'error');
+            // Initialize with empty workspaces so UI still works
+            this.workspaces = [];
+            this.init();
+        }
     }
 
     init() {
@@ -220,6 +228,8 @@ class WorkspaceAdmin {
                 if (response.ok) {
                     this.showToast(`Workspace "${formData.name}" updated`, 'success');
                     await this.loadWorkspaces();
+                    this.renderWorkspaces();
+                    this.updateStatistics();
                 } else {
                     throw new Error('Failed to update workspace');
                 }
@@ -234,6 +244,8 @@ class WorkspaceAdmin {
                 if (response.ok) {
                     this.showToast(`Workspace "${formData.name}" created`, 'success');
                     await this.loadWorkspaces();
+                    this.renderWorkspaces();
+                    this.updateStatistics();
                 } else if (response.status === 409) {
                     throw new Error('Workspace with this slug already exists');
                 } else {
@@ -279,6 +291,8 @@ class WorkspaceAdmin {
             if (response.ok) {
                 this.showToast(`Workspace "${workspace.name}" deleted`, 'success');
                 await this.loadWorkspaces();
+                this.renderWorkspaces();
+                this.updateStatistics();
             } else {
                 throw new Error('Failed to delete workspace');
             }
@@ -387,6 +401,8 @@ class WorkspaceAdmin {
                         this.showToast(`Workspace "${workspace.name}" is now active`, 'success');
                     }
                     await this.loadWorkspaces();
+                    this.renderWorkspaces();
+                    this.updateStatistics();
                 } else {
                     throw new Error('Failed to update workspace status');
                 }
@@ -503,8 +519,9 @@ class WorkspaceAdmin {
     }
 }
 
-// Initialize the admin panel
+// Initialize the admin panel and make it globally accessible
 const workspaceAdmin = new WorkspaceAdmin();
+window.workspaceAdmin = workspaceAdmin;  // Make available for onclick handlers
 
 // Add slide out animation
 const style = document.createElement('style');

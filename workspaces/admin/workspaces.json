@@ -19,8 +19,18 @@
       "status": "active",
       "type": "nodejs",
       "created": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "test",
+      "slug": "test",
+      "name": "test",
+      "icon": "📁",
+      "description": "",
+      "status": "active",
+      "type": "static",
+      "created": "2025-08-20T05:02:28.786Z"
     }
   ],
-  "lastModified": "2025-08-20T00:00:00.000Z",
+  "lastModified": "2025-08-20T05:02:28.787Z",
   "version": "1.0.0"
 }
