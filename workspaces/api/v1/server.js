@@ -558,6 +558,97 @@ router.post('/workspaces/:slug/docker/:action', async (req, res) => {
     }
 });
 
+// Command execution endpoint for workspaces
+router.post('/workspaces/:slug/execute', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const { command, cwd = '.' } = req.body;
+        
+        // Validate inputs
+        if (!command) {
+            return res.status(400).json({ error: 'Command is required' });
+        }
+        
+        // Security: Check if workspace exists
+        const data = await loadWorkspaces();
+        const workspace = data.workspaces.find(w => w.slug === slug);
+        
+        if (!workspace) {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
+        
+        // Construct the working directory path
+        const workspacePath = path.join(WORKSPACES_ROOT, slug);
+        const fullCwd = path.resolve(workspacePath, cwd);
+        
+        // Security: Ensure the working directory is within the workspace
+        if (!fullCwd.startsWith(workspacePath)) {
+            return res.status(403).json({ error: 'Access denied: Path outside workspace' });
+        }
+        
+        // Security: Basic command filtering (can be enhanced)
+        const dangerousCommands = ['rm -rf /', 'dd if=', 'mkfs', 'fdisk', 'shutdown', 'reboot', 'init'];
+        const commandLower = command.toLowerCase();
+        
+        for (const dangerous of dangerousCommands) {
+            if (commandLower.includes(dangerous)) {
+                return res.status(403).json({ error: 'Command contains potentially dangerous operations' });
+            }
+        }
+        
+        // Security: Limit command execution time (30 seconds timeout)
+        const timeout = 30000;
+        
+        // Execute the command with timeout
+        const executeWithTimeout = new Promise((resolve, reject) => {
+            const child = exec(command, {
+                cwd: fullCwd,
+                timeout: timeout,
+                maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+            }, (error, stdout, stderr) => {
+                if (error) {
+                    // Check if it's a timeout
+                    if (error.killed && error.signal === 'SIGTERM') {
+                        reject(new Error('Command execution timed out'));
+                    } else {
+                        // Return error with output for debugging
+                        resolve({
+                            success: false,
+                            error: error.message,
+                            stdout: stdout || '',
+                            stderr: stderr || '',
+                            code: error.code
+                        });
+                    }
+                } else {
+                    resolve({
+                        success: true,
+                        stdout: stdout || '',
+                        stderr: stderr || '',
+                        code: 0
+                    });
+                }
+            });
+        });
+        
+        const result = await executeWithTimeout;
+        
+        res.json({
+            workspace: slug,
+            command: command,
+            cwd: cwd,
+            result: result
+        });
+        
+    } catch (error) {
+        console.error('Command execution error:', error);
+        res.status(500).json({ 
+            error: error.message,
+            workspace: req.params.slug
+        });
+    }
+});
+
 // Health check
 router.get('/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
@@ -575,4 +666,5 @@ app.listen(PORT, () => {
     console.log(`   PUT    /api/v1/workspaces/:slug     - Update workspace`);
     console.log(`   DELETE /api/v1/workspaces/:slug     - Delete workspace`);
     console.log(`   POST   /api/v1/workspaces/:slug/docker/:action - Docker operations (start/stop/restart)`);
+    console.log(`   POST   /api/v1/workspaces/:slug/execute - Execute commands in workspace`);
 });

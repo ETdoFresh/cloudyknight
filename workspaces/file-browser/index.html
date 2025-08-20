@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Browser</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <a href="/" class="back-button" title="Back to Hub">
+                    <span class="back-icon">←</span>
+                </a>
+                <h1>📂 File Browser</h1>
+            </div>
+            <div class="header-stats" id="headerStats">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalFiles">0</span>
+                    <span class="stat-label">Files</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalFolders">0</span>
+                    <span class="stat-label">Folders</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalSize">0 KB</span>
+                    <span class="stat-label">Total Size</span>
+                </div>
+            </div>
+            <div class="server-info">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <span class="status-indicator" id="serverStatus"></span>
+                <span id="serverUrl">Connecting...</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Workspace Selector and Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <select id="workspaceSelector" class="workspace-selector">
+                        <option value="">Select Workspace...</option>
+                    </select>
+                    <button id="refreshFiles" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">🔄</span>
+                        Refresh
+                    </button>
+                </div>
+                <div class="toolbar-right">
+                    <button id="createFolder" class="btn btn-primary" disabled>
+                        <span class="btn-icon">📁</span>
+                        New Folder
+                    </button>
+                    <button id="createFile" class="btn btn-primary" disabled>
+                        <span class="btn-icon">📄</span>
+                        New File
+                    </button>
+                    <button id="uploadFile" class="btn btn-primary" disabled>
+                        <span class="btn-icon">📤</span>
+                        Upload
+                    </button>
+                    <button id="openTerminal" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">💻</span>
+                        Terminal
+                    </button>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" title="Grid View">
+                            <span>⊞</span>
+                        </button>
+                        <button class="view-btn" data-view="list" title="List View">
+                            <span>☰</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breadcrumb Navigation -->
+            <div class="breadcrumb-container">
+                <div class="breadcrumb" id="breadcrumb">
+                    <span class="breadcrumb-item">
+                        <span class="breadcrumb-icon">🏠</span>
+                        <span class="breadcrumb-text">Home</span>
+                    </span>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="fileSearch" placeholder="Search files..." disabled>
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+
+            <!-- Files Container -->
+            <div id="filesContainer" class="files-container grid-view">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📂</div>
+                    <h3>Select a Workspace</h3>
+                    <p>Choose a workspace from the dropdown above to browse its files</p>
+                </div>
+                <div class="loading-spinner hidden" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <p>Loading files...</p>
+                </div>
+                <!-- File items will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- File/Folder Creation Modal -->
+    <div id="createModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="createModalTitle">Create New File</h2>
+                <button class="modal-close" id="closeCreateModal">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="createForm">
+                    <div class="form-group">
+                        <label for="itemName">Name</label>
+                        <input type="text" id="itemName" placeholder="Enter name" required>
+                        <small class="form-hint" id="nameHint">Use / to create nested folders (e.g., folder/subfolder/file.txt)</small>
+                    </div>
+                    
+                    <div class="form-group" id="fileContentGroup">
+                        <label for="fileContent">Content (optional)</label>
+                        <textarea id="fileContent" placeholder="Enter file content" rows="10"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelCreate" class="btn btn-secondary">Cancel</button>
+                <button type="submit" form="createForm" id="submitCreate" class="btn btn-primary">
+                    <span class="btn-icon">✓</span>
+                    Create
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Operations Modal -->
+    <div id="fileModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="fileModalTitle">File Options</h2>
+                <button class="modal-close" id="closeFileModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="file-info">
+                    <div class="file-info-icon" id="fileIcon">📄</div>
+                    <h3 id="fileName">filename.txt</h3>
+                    <div class="file-metadata">
+                        <div class="metadata-item">
+                            <span class="metadata-label">Type:</span>
+                            <span class="metadata-value" id="fileType">--</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Size:</span>
+                            <span class="metadata-value" id="fileSize">--</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Modified:</span>
+                            <span class="metadata-value" id="fileModified">--</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Path:</span>
+                            <span class="metadata-value" id="filePath">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button id="openFile" class="action-button" title="View in File Viewer (Ctrl/Cmd+Click for new tab)">
+                        <span class="action-icon">👁️</span>
+                        <span class="action-text">View in Viewer</span>
+                    </button>
+                    <button id="downloadFile" class="action-button" title="Download file (Ctrl/Cmd+D)">
+                        <span class="action-icon">📥</span>
+                        <span class="action-text">Download</span>
+                    </button>
+                    <button id="renameFile" class="action-button" title="Rename (F2)">
+                        <span class="action-icon">✏️</span>
+                        <span class="action-text">Rename</span>
+                    </button>
+                    <button id="deleteFile" class="action-button danger" title="Delete (Delete key)">
+                        <span class="action-icon">🗑️</span>
+                        <span class="action-text">Delete</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeFileModalBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="renameModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Rename Item</h2>
+                <button class="modal-close" id="closeRenameModal">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="renameForm">
+                    <div class="form-group">
+                        <label for="newName">New Name</label>
+                        <input type="text" id="newName" placeholder="Enter new name" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelRename" class="btn btn-secondary">Cancel</button>
+                <button type="submit" form="renameForm" id="submitRename" class="btn btn-primary">
+                    <span class="btn-icon">✓</span>
+                    Rename
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-confirm">
+            <div class="modal-header">
+                <h2>Confirm Action</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmCancel" class="btn btn-secondary">Cancel</button>
+                <button id="confirmAction" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for uploads -->
+    <input type="file" id="fileInput" class="hidden" multiple>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
