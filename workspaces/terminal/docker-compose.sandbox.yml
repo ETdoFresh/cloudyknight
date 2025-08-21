@@ -1,5 +1,5 @@
 services:
-  # Frontend UI service
+  # Terminal UI service (existing)
   terminal:
     image: node:20-alpine
     container_name: terminal
@@ -30,18 +30,19 @@ services:
       - traefik.http.middlewares.terminal-redirect.redirectregex.regex=^https?://([^/]+)/terminal$$
       - traefik.http.middlewares.terminal-redirect.redirectregex.replacement=https://$$1/terminal/
       - traefik.http.routers.terminal.middlewares=terminal-redirect
-  
-  # Ubuntu terminal with ttyd
-  terminal-ttyd:
-    build:
-      context: .
-      dockerfile: Dockerfile.simple
-    container_name: terminal-ttyd
-    hostname: cloudyknight-terminal
+
+  # Terminal sandbox service with ttyd
+  terminal-sandbox:
+    build: .
+    container_name: terminal-sandbox
+    hostname: cloudyknight-sandbox
     volumes:
-      # Mount all workspaces
+      # Mount all workspaces read-write
       - /home/claude/cloudyknight/workspaces:/workspaces:rw
+      # Mount specific workspace based on selection (will be overridden at runtime)
+      - ${WORKSPACE_PATH:-/home/claude/cloudyknight/workspaces/terminal}:/workspace:rw
     environment:
+      - WORKSPACE_NAME=${WORKSPACE_NAME:-terminal}
       - TERM=xterm-256color
     networks:
       - traefik-network
@@ -58,10 +59,9 @@ services:
       - traefik.http.routers.terminal-ws.priority=15
       - traefik.http.services.terminal-ws.loadbalancer.server.port=7681
       
-      # Strip prefix and add headers for WebSocket
+      # Strip prefix middleware for WebSocket
       - traefik.http.middlewares.terminal-ws-strip.stripprefix.prefixes=/terminal/ws
-      - traefik.http.middlewares.terminal-ws-headers.headers.customrequestheaders.X-Forwarded-Proto=https
-      - traefik.http.routers.terminal-ws.middlewares=terminal-ws-strip,terminal-ws-headers
+      - traefik.http.routers.terminal-ws.middlewares=terminal-ws-strip
 
 networks:
   traefik-network:

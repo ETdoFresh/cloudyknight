@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Share-Based Investment Tracker</title>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Investment Tracker</h1>
+        <div class="header-controls">
+          <div class="investment-stats">
+            <div class="stat-item">Company Value: $<span id="total">0.00</span></div>
+            <div class="stat-item">Share Price: $<span id="share-price">0.00</span></div>
+            <div class="stat-item">Total Shares: <span id="total-shares">0</span></div>
+            <div class="stat-item">Treasury: <span id="treasury-shares">0</span></div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Share Issuance Section -->
+        <section class="share-issuance-section">
+          <h2>Issue New Shares</h2>
+          <div class="transaction-info">
+            <p>Create new shares for the company. This sets the initial share price and adds shares to the treasury.</p>
+          </div>
+          <div class="input-group">
+            <input type="number" id="issue-shares-amount" placeholder="Number of shares" min="1">
+            <input type="number" id="issue-shares-price" placeholder="Price per share ($)" step="0.01" min="0.01">
+            <input type="datetime-local" id="issue-shares-date">
+            <button id="issue-shares" class="primary-btn">Issue Shares</button>
+          </div>
+        </section>
+
+        <!-- Ownership Section -->
+        <section class="ownership-section">
+          <h2>Ownership Structure</h2>
+          <div class="ownership-container">
+            <div id="ownership-chart" class="chart-container">
+              <canvas id="pieChart"></canvas>
+            </div>
+            <div id="shareholders-list"></div>
+          </div>
+        </section>
+
+        <!-- Share Trading Section -->
+        <section class="actions-section">
+          <h2>Buy/Sell Shares</h2>
+          <div class="transaction-info">
+            <p>Buy shares from the company treasury or sell shares back to the company at current market price.</p>
+          </div>
+          <div class="input-group">
+            <input type="text" id="investor-name" placeholder="Investor Name">
+            <input type="number" id="share-amount" min="1" placeholder="Number of shares">
+            <div class="calculated-value" id="calculated-value">Cost: $0</div>
+            <input type="datetime-local" id="share-date">
+            <button id="buy-shares" class="primary-btn">Buy Shares</button>
+            <button id="sell-shares" class="primary-btn">Sell Shares</button>
+          </div>
+        </section>
+
+        <!-- Company Operations Section -->
+        <section class="transactions-section">
+          <h2>Company Operations</h2>
+          <div class="transaction-info">
+            <p>Record income and expenses that affect the company's value and share price.</p>
+          </div>
+          <div class="transaction-inputs">
+            <select id="transaction-direction">
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+            <input type="number" id="transaction-amount" placeholder="Amount ($)" step="0.01">
+            <input type="text" id="transaction-description" placeholder="Description">
+            <input type="datetime-local" id="transaction-date">
+            <button id="add-transaction" class="primary-btn">Add Transaction</button>
+          </div>
+        </section>
+
+        <!-- Data Management -->
+        <section class="actions-section">
+          <div class="data-actions">
+            <button id="reset-data" class="danger-btn">Reset All Data</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main-shares.js"></script>
+  </body>
+</html>

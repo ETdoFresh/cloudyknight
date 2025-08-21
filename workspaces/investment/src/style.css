@@ -45,6 +45,303 @@ h1 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  position: relative;
+  display: inline-block;
+}
+
+.info-tooltip {
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: super;
+  font-size: 0.6em;
+}
+
+.info-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #667eea;
+  color: white;
+  text-align: center;
+  line-height: 18px;
+  font-size: 12px;
+  cursor: help;
+  font-weight: bold;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 300px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  z-index: 1;
+  top: 150%;
+  right: -10px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: normal;
+  -webkit-text-fill-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.info-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
+}
+
+.setup-section {
+  background: #333;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.setup-section h2 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.setup-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.setup-content p {
+  margin-bottom: 2rem;
+  color: #aaa;
+}
+
+.ownership-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.chart-section {
+  background: #333;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 0 0 2rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-section h2 {
+  color: #fff;
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.time-range-btn {
+  background: #444;
+  color: #999;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-range-btn:hover {
+  background: #555;
+  color: #fff;
+}
+
+.time-range-btn.active {
+  background: #4a90e2;
+  color: white;
+}
+
+.chart-container {
+  background: #242424;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow: visible;
+  width: 100% !important;
+  margin: 0 !important;
+  position: relative;
+  min-height: 320px;
+  box-sizing: border-box;
+  display: block !important;
+}
+
+.chart-container canvas {
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.view-selector {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.view-selector label {
+  color: #999;
+  font-weight: 600;
+}
+
+.view-selector select {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #333;
+  color: #fff;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.history-section {
+  background: #333;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.history-section h2 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1.5em;
+}
+
+.ownership-summary {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.company-row {
+  background: #2a2a2a;
+  font-weight: bold;
+}
+
+.transaction-info {
+  margin-bottom: 1rem;
+  color: #aaa;
+  font-size: 0.95em;
+}
+
+.value-chart-section {
+  margin: 2rem 0;
+}
+
+.value-chart-container {
+  background: #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 400px;
+  position: relative;
+}
+
+.value-chart-container canvas {
+  width: 100% !important;
+  height: 350px !important;
+}
+
+.shareholder-impact {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.shareholder-impact.positive {
+  color: #50c878;
+  border-left: 3px solid #50c878;
+}
+
+.shareholder-impact.negative {
+  color: #ff6b6b;
+  border-left: 3px solid #ff6b6b;
+}
+
+.personal-value-chart-container {
+  background: #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  height: 350px;
+}
+
+.personal-value-chart-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #aaa;
+}
+
+.personal-value-chart-container canvas {
+  width: 100% !important;
+  height: 280px !important;
+}
+
+.data-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primary-btn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+  background: #357abd;
+  transform: translateY(-2px);
 }
 
 .investment-stats {
@@ -75,6 +372,7 @@ h1 {
 main {
   display: grid;
   gap: 2rem;
+  width: 100%;
 }
 
 section {
@@ -82,6 +380,8 @@ section {
   border-radius: 12px;
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h2 {
@@ -192,6 +492,129 @@ tr:hover {
   width: 100%;
   background: rgba(255, 255, 255, 0.02);
   border-radius: 8px;
+}
+
+.action-btn {
+  background: #444;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin: 0 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #555;
+  transform: translateY(-1px);
+}
+
+.edit-btn {
+  background: #3498db;
+}
+
+.edit-btn:hover {
+  background: #2980b9;
+}
+
+.delete-btn {
+  background: #e74c3c;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #333;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-content h2 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-form label {
+  display: flex;
+  flex-direction: column;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.modal-form input,
+.modal-form select {
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #242424;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.secondary-btn {
+  background: #666;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+  background: #555;
+}
+
+.danger-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.danger-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
 }
 
 .input-group, .transaction-inputs {

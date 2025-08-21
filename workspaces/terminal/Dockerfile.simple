@@ -1,0 +1,26 @@
+# Ubuntu terminal with ttyd and modern Node.js
+FROM ubuntu:22.04
+
+# Install essentials and ttyd
+RUN apt-get update && apt-get install -y \
+    curl wget vim nano git \
+    build-essential python3 python3-pip \
+    && wget https://github.com/tsl0922/ttyd/releases/download/1.7.4/ttyd.x86_64 -O /usr/local/bin/ttyd \
+    && chmod +x /usr/local/bin/ttyd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20 (LTS)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install useful global npm packages including Claude Code
+RUN npm install -g npm@latest @anthropic-ai/claude-code
+
+WORKDIR /workspace
+EXPOSE 7681
+
+# Start ttyd with bash (writable mode)
+CMD ["ttyd", "--writable", "-p", "7681", "/bin/bash", "-l"]

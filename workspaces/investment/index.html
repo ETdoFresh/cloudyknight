@@ -4,168 +4,108 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Investment Tracker</title>
+    <title>Share-Based Investment Tracker</title>
   </head>
   <body>
     <div id="app">
       <header>
-        <h1>Investment Tracker</h1>
+        <h1>Investment Tracker - Dynamic Investment Model<sup class="info-tooltip">
+            <span class="info-icon">?</span>
+            <span class="tooltip-text">In this model, new investments dilute existing ownership percentages but maintain value. As more investors contribute, your percentage ownership adjusts while your investment value remains proportional to company performance.</span>
+          </sup>
+        </h1>
         <div class="header-controls">
-          <div class="investor-selector">
-            <label for="current-investor">View as:</label>
-            <select id="current-investor">
+          <div class="investment-stats">
+            <div class="stat-item">Company Value: $<span id="total">0.00</span></div>
+            <div class="stat-item">Total Investment: $<span id="total-investment">0.00</span></div>
+          </div>
+          <div class="view-selector">
+            <label for="investor-view">View as:</label>
+            <select id="investor-view">
               <option value="all">All Investors</option>
             </select>
-          </div>
-          <div class="investment-stats">
-            <div class="stat-item">Initial Capital: $<span id="initial-capital">0.00</span></div>
-            <div class="stat-item">Current Value: $<span id="total">0.00</span></div>
           </div>
         </div>
       </header>
 
       <main>
-        <section class="initial-investment-section">
-          <h2>Initial Investment</h2>
-          <div class="input-group">
-            <input type="text" id="initial-investor-name" placeholder="Investor/Partner Name">
-            <input type="number" id="initial-amount" placeholder="Investment Amount ($)" step="0.01">
-            <input type="datetime-local" id="initial-date">
-            <button id="add-initial-investment">Add Initial Investment</button>
-          </div>
-          <div id="initial-investments-list"></div>
-        </section>
-
+        <!-- Ownership Section -->
         <section class="ownership-section">
-          <h2>Ownership Distribution</h2>
-          <div id="ownership-chart" class="chart-container">
-            <canvas id="pieChart"></canvas>
+          <h2>Ownership Structure</h2>
+          <div class="ownership-container">
+            <div id="ownership-chart" class="chart-container">
+              <canvas id="pieChart"></canvas>
+            </div>
+            <div id="shareholders-list"></div>
           </div>
-          <div id="shareholders-list"></div>
         </section>
 
+        <!-- Investment Section -->
         <section class="actions-section">
-          <h2>Buy/Sell Shares</h2>
+          <h2>Investment/Withdrawal</h2>
+          <div class="transaction-info">
+            <p>Invest in the company or withdraw funds. Each investment increases company value and grants proportional ownership based on total investments.</p>
+          </div>
           <div class="input-group">
             <input type="text" id="investor-name" placeholder="Investor Name">
-            <input type="number" id="share-percentage" min="0.1" max="49" step="0.1" placeholder="Percentage (0.1 - 49)">
-            <div class="calculated-value" id="calculated-value">Value: $0</div>
-            <input type="datetime-local" id="share-date">
-            <button id="buy-shares">Buy Shares</button>
-            <button id="sell-shares">Sell Shares</button>
+            <input type="number" id="investment-amount" min="0.01" step="0.01" placeholder="Amount ($)">
+            <div class="calculated-value" id="calculated-ownership">Ownership: 0%</div>
+            <input type="datetime-local" id="investment-date">
+            <button id="invest" class="primary-btn">Invest</button>
+            <button id="withdraw" class="primary-btn">Withdraw</button>
           </div>
         </section>
 
-        <section class="investor-view-section" id="investor-view" style="display: none;">
-          <h2>Personal Investment View: <span id="investor-name-display"></span></h2>
-          <div class="investor-stats">
-            <div class="stat-card">
-              <h3>Total Invested</h3>
-              <div class="stat-value" id="personal-invested">$0</div>
-            </div>
-            <div class="stat-card">
-              <h3>Current Value</h3>
-              <div class="stat-value" id="personal-value">$0</div>
-            </div>
-            <div class="stat-card">
-              <h3>Profit/Loss</h3>
-              <div class="stat-value" id="personal-profit">$0</div>
-            </div>
-            <div class="stat-card">
-              <h3>ROI</h3>
-              <div class="stat-value" id="personal-roi">0%</div>
+        <!-- Value Charts Section -->
+        <section class="chart-section">
+          <div class="chart-header">
+            <h2 id="chart-title">Company Value Over Time</h2>
+            <div class="time-range-selector">
+              <button class="time-range-btn active" data-range="6M">6M</button>
+              <button class="time-range-btn" data-range="1Y">1Y</button>
+              <button class="time-range-btn" data-range="YTD">YTD</button>
+              <button class="time-range-btn" data-range="ALL">All</button>
             </div>
           </div>
-          <div class="investment-graph">
-            <canvas id="investmentGraph"></canvas>
+          <div class="chart-container">
+            <canvas id="valueChart"></canvas>
           </div>
-          <div id="personal-transactions"></div>
         </section>
 
+        <!-- Transaction History Section -->
+        <section class="history-section" id="transaction-history-section" style="display: none;">
+          <h2>Transaction History</h2>
+          <div id="transaction-history"></div>
+        </section>
+
+        <!-- Company Operations Section -->
         <section class="transactions-section">
-          <h2>Add Transaction</h2>
+          <h2>Company Operations</h2>
+          <div class="transaction-info">
+            <p>Record income and expenses that affect the company's value.</p>
+          </div>
           <div class="transaction-inputs">
-            <select id="transaction-type">
-              <option value="et-side">ET Side (affects ET only)</option>
-              <option value="company-side">Company Side (affects all)</option>
-            </select>
             <select id="transaction-direction">
-              <option value="expense">Expense</option>
               <option value="income">Income</option>
+              <option value="expense">Expense</option>
             </select>
-            <input type="number" id="transaction-amount" placeholder="Amount ($)">
+            <input type="number" id="transaction-amount" placeholder="Amount ($)" step="0.01">
             <input type="text" id="transaction-description" placeholder="Description">
             <input type="datetime-local" id="transaction-date">
-            <button id="add-transaction">Add Transaction</button>
+            <button id="add-transaction" class="primary-btn">Add Transaction</button>
           </div>
         </section>
 
-        <section class="timeline-section">
-          <h2>Investment Timeline</h2>
-          <div id="timeline"></div>
-          <button id="reset-data" style="margin-top: 1rem; background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);">Reset All Data</button>
+        <!-- Data Management -->
+        <section class="actions-section">
+          <div class="data-actions">
+            <button id="export-data" class="secondary-btn">Export Data</button>
+            <button id="import-data" class="secondary-btn">Import Data</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <button id="sanitize-data" class="secondary-btn">Sanitize Data</button>
+            <button id="reset-data" class="danger-btn">Reset All Data</button>
+          </div>
         </section>
-
-        <!-- Edit Transaction Modal -->
-        <div id="edit-modal" class="modal" style="display: none;">
-          <div class="modal-content">
-            <h2>Edit Transaction</h2>
-            <div class="modal-inputs">
-              <select id="edit-type">
-                <option value="et-side">ET Side (affects ET only)</option>
-                <option value="company-side">Company Side (affects all)</option>
-              </select>
-              <select id="edit-direction">
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
-              <input type="number" id="edit-amount" placeholder="Amount ($)">
-              <input type="text" id="edit-description" placeholder="Description">
-              <input type="datetime-local" id="edit-date">
-            </div>
-            <div class="modal-buttons">
-              <button id="save-edit">Save Changes</button>
-              <button id="cancel-edit">Cancel</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Edit Share Transaction Modal -->
-        <div id="edit-share-modal" class="modal" style="display: none;">
-          <div class="modal-content">
-            <h2>Edit Share Transaction</h2>
-            <div class="modal-inputs">
-              <input type="text" id="edit-share-investor" placeholder="Investor Name" readonly>
-              <select id="edit-share-type">
-                <option value="buy">Buy</option>
-                <option value="sell">Sell</option>
-              </select>
-              <input type="number" id="edit-share-percentage" min="0.1" max="49" step="0.1" placeholder="Percentage">
-              <div class="calculated-value" id="edit-calculated-value">Value: $0.00</div>
-              <input type="datetime-local" id="edit-share-date">
-            </div>
-            <div class="modal-buttons">
-              <button id="save-share-edit">Save Changes</button>
-              <button id="cancel-share-edit">Cancel</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Edit Initial Investment Modal -->
-        <div id="edit-initial-modal" class="modal" style="display: none;">
-          <div class="modal-content">
-            <h2>Edit Initial Investment</h2>
-            <div class="modal-inputs">
-              <input type="text" id="edit-initial-investor" placeholder="Investor/Partner Name">
-              <input type="number" id="edit-initial-amount" placeholder="Investment Amount ($)" step="0.01">
-              <input type="datetime-local" id="edit-initial-date">
-            </div>
-            <div class="modal-buttons">
-              <button id="save-initial-edit">Save Changes</button>
-              <button id="cancel-initial-edit">Cancel</button>
-            </div>
-          </div>
-        </div>
       </main>
     </div>
     <script type="module" src="/src/main.js"></script>
