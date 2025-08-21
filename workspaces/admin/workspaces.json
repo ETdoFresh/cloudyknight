@@ -121,6 +121,16 @@
       "created": "2025-08-20T22:30:00.000Z"
     },
     {
+      "id": "terminal",
+      "slug": "terminal",
+      "name": "Terminal",
+      "icon": "💻",
+      "description": "Web-based terminal for executing commands in workspaces",
+      "status": "active",
+      "type": "nodejs",
+      "created": "2025-08-21T01:40:00.000Z"
+    },
+    {
       "id": "api",
       "slug": "api",
       "name": "API",

@@ -1,0 +1,35 @@
+services:
+  terminal:
+    image: node:20-alpine
+    container_name: terminal
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - NODE_ENV=development
+      - VITE_HOST=0.0.0.0
+    networks:
+      - traefik-network
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      
+      # Main router
+      - traefik.http.routers.terminal.rule=Host(`${DOMAIN}`) && PathPrefix(`/terminal`)
+      - traefik.http.routers.terminal.entrypoints=websecure
+      - traefik.http.routers.terminal.tls=true
+      - traefik.http.routers.terminal.tls.certresolver=letsencrypt
+      - traefik.http.routers.terminal.priority=10
+      - traefik.http.services.terminal.loadbalancer.server.port=5173
+      
+      # Trailing slash redirect
+      - traefik.http.middlewares.terminal-redirect.redirectregex.regex=^https?://([^/]+)/terminal$$
+      - traefik.http.middlewares.terminal-redirect.redirectregex.replacement=https://$$1/terminal/
+      - traefik.http.routers.terminal.middlewares=terminal-redirect
+
+networks:
+  traefik-network:
+    external: true

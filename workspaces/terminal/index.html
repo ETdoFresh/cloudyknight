@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal - CloudyKnight</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <!-- Workspace Selection Modal -->
+    <div id="workspaceModal" class="modal active">
+        <div class="modal-content">
+            <h2>Select Workspace</h2>
+            <p>Choose a workspace to open terminal in:</p>
+            <div id="workspaceList" class="workspace-list">
+                <!-- Workspaces will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Terminal Container -->
+    <div id="terminalContainer" class="terminal-container hidden">
+        <div class="terminal-header">
+            <div class="terminal-info">
+                <span class="terminal-title">Terminal</span>
+                <span class="terminal-workspace" id="workspaceInfo"></span>
+            </div>
+            <div class="terminal-controls">
+                <button id="clearBtn" class="btn-icon" title="Clear Terminal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                    </svg>
+                </button>
+                <button id="changeWorkspaceBtn" class="btn-icon" title="Change Workspace">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 3H4a1 1 0 0 0-1 1v5M21 9V4a1 1 0 0 0-1-1h-5M3 15v5a1 1 0 0 0 1 1h5M15 21h5a1 1 0 0 0 1-1v-5"/>
+                    </svg>
+                </button>
+                <button id="themeToggle" class="btn-icon" title="Toggle Theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="terminal" class="terminal"></div>
+        <div class="terminal-status">
+            <span id="statusText">Ready</span>
+            <span id="commandCount">Commands: 0</span>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
