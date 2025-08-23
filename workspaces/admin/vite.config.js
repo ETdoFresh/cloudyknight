@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/admin/',
+  base: '/admin',
   server: {
     host: '0.0.0.0',
     hmr: {
