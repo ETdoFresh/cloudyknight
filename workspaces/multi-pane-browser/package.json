@@ -4,6 +4,7 @@
   "description": "Multi-pane browser workspace for CloudyKnight",
   "type": "module",
   "scripts": {
+    "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
