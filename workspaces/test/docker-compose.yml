@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  test:
-    container_name: test
-    image: nginx:alpine
-    volumes:
-      - .:/usr/share/nginx/html:ro
-    restart: unless-stopped
