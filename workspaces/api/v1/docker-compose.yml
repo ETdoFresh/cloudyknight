@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: api_v1
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - api-v1-data:/workspaces
+      - /var/run/docker.sock:/var/run/docker.sock  # Allow Docker commands
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    command: sh -c "apk add --no-cache docker-cli docker-compose && npm install && node --watch server.js"
+    restart: unless-stopped
+
+volumes:
+  api-v1-data:
