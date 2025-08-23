@@ -1,12 +1,14 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/admin/',
   server: {
     host: '0.0.0.0',
     hmr: {
       clientPort: 443,
       protocol: 'wss',
-      host: 'workspaces.etdofresh.com'
+      host: 'workspaces.etdofresh.com',
+      path: '/admin/@vite'
     },
     // Watch options for Docker environments
     watch: {
