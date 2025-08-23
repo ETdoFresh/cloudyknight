@@ -5,7 +5,7 @@ services:
     container_name: clock
     working_dir: /app
     volumes:
-      - ./:/app
+      - ./workspaces/clock/:/app
       - /app/node_modules  # Anonymous volume for node_modules
     command: sh -c "npm install && npm run dev"
     environment:
