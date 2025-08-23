@@ -221,7 +221,9 @@ class WorkspaceAdmin {
         try {
             if (this.currentEditId) {
                 // Update existing workspace via API
-                const response = await fetch(`${this.apiUrl}/workspaces/${this.currentEditId}`, {
+                // Use slug from the form or fall back to the ID
+                const workspaceSlug = document.getElementById('workspaceSlug').value || this.currentEditId;
+                const response = await fetch(`${this.apiUrl}/workspaces/${workspaceSlug}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
@@ -233,7 +235,9 @@ class WorkspaceAdmin {
                     this.renderWorkspaces();
                     this.updateStatistics();
                 } else {
-                    throw new Error('Failed to update workspace');
+                    const errorText = await response.text();
+                    console.error('Update failed:', errorText);
+                    throw new Error(`Failed to update workspace: ${response.status}`);
                 }
             } else {
                 // Create new workspace via API
@@ -284,9 +288,10 @@ class WorkspaceAdmin {
 
     async deleteWorkspace(id) {
         const workspace = this.workspaces.find(w => w.id === id);
+        const identifier = workspace ? workspace.slug : id;
         
         try {
-            const response = await fetch(`${this.apiUrl}/workspaces/${id}`, {
+            const response = await fetch(`${this.apiUrl}/workspaces/${identifier}`, {
                 method: 'DELETE'
             });
             
@@ -296,7 +301,9 @@ class WorkspaceAdmin {
                 this.renderWorkspaces();
                 this.updateStatistics();
             } else {
-                throw new Error('Failed to delete workspace');
+                const errorText = await response.text();
+                console.error('Delete failed:', errorText);
+                throw new Error(`Failed to delete workspace: ${response.status}`);
             }
         } catch (error) {
             this.showToast(error.message, 'error');
@@ -390,7 +397,7 @@ class WorkspaceAdmin {
             const newStatus = workspace.status === 'active' ? 'hidden' : 'active';
             
             try {
-                const response = await fetch(`${this.apiUrl}/workspaces/${id}`, {
+                const response = await fetch(`${this.apiUrl}/workspaces/${workspace.slug}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
