@@ -4,6 +4,7 @@ export default defineConfig({
   base: '/admin/',
   server: {
     host: '0.0.0.0',
+    port: 3000,
     hmr: {
       clientPort: 443,
       protocol: 'wss',
@@ -14,14 +15,8 @@ export default defineConfig({
     watch: {
       usePolling: true,
       interval: 1000
-    },
-    // Allow requests from these hosts
-    allowedHosts: [
-      'localhost',
-      'admin',
-      'workspaces.etdofresh.com',
-      '.etdofresh.com'
-    ]
+    }
   },
-  appType: 'mpa', // Multi-page app mode - don't serve index.html for all routes
+  // Remove appType: 'mpa' to use default SPA behavior
+  // This will serve index.html properly for the admin panel
 });
