@@ -3,44 +3,14 @@ services:
     image: portainer/portainer-ce:latest
     container_name: portainer
     restart: unless-stopped
-    # No ports exposed directly - all access through Traefik
+    # No ports exposed - access via external configuration
     security_opt:
       - no-new-privileges:true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - portainer_data:/data
-    networks:
-      - traefik-network
-    labels:
-      # Enable Traefik
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-network"
-      
-      # Portainer HTTPS Configuration on port 9443
-      - "traefik.http.routers.portainer.rule=Host(`workspaces.etdofresh.com`)"
-      - "traefik.http.routers.portainer.entrypoints=portainer"
-      - "traefik.http.routers.portainer.service=portainer"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9443"
-      - "traefik.http.services.portainer.loadbalancer.server.scheme=https"
-      
-      # Redirect from /portainer to port 9443
-      - "traefik.http.routers.portainer-redirect.rule=Host(`workspaces.etdofresh.com`) && Path(`/portainer`)"
-      - "traefik.http.routers.portainer-redirect.entrypoints=websecure"
-      - "traefik.http.routers.portainer-redirect.tls=true"
-      - "traefik.http.routers.portainer-redirect.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.portainer-redirect.middlewares=portainer-redirect-middleware"
-      - "traefik.http.routers.portainer-redirect.priority=100"
-      
-      # Redirect middleware to HTTPS port 9443
-      - "traefik.http.middlewares.portainer-redirect-middleware.redirectregex.regex=^https?://([^/]+)/portainer/?$$"
-      - "traefik.http.middlewares.portainer-redirect-middleware.redirectregex.replacement=https://$$1:9443/"
-      - "traefik.http.middlewares.portainer-redirect-middleware.redirectregex.permanent=true"
 
 volumes:
   portainer_data:
     external: true
     name: portainer_data
-
-networks:
-  traefik-network:
-    external: true

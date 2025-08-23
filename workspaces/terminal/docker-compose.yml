@@ -11,25 +11,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_HOST=0.0.0.0
-    networks:
-      - traefik-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-network
-      
-      # Main router for UI
-      - traefik.http.routers.terminal.rule=Host(`${DOMAIN}`) && PathPrefix(`/terminal`)
-      - traefik.http.routers.terminal.entrypoints=websecure
-      - traefik.http.routers.terminal.tls=true
-      - traefik.http.routers.terminal.tls.certresolver=letsencrypt
-      - traefik.http.routers.terminal.priority=10
-      - traefik.http.services.terminal.loadbalancer.server.port=5173
-      
-      # Trailing slash redirect
-      - traefik.http.middlewares.terminal-redirect.redirectregex.regex=^https?://([^/]+)/terminal$$
-      - traefik.http.middlewares.terminal-redirect.redirectregex.replacement=https://$$1/terminal/
-      - traefik.http.routers.terminal.middlewares=terminal-redirect
   
   # Ubuntu terminal with ttyd
   terminal-ttyd:
@@ -43,26 +25,4 @@ services:
       - /home/claude/cloudyknight/workspaces:/workspaces:rw
     environment:
       - TERM=xterm-256color
-    networks:
-      - traefik-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-network
-      
-      # WebSocket router for ttyd
-      - traefik.http.routers.terminal-ws.rule=Host(`${DOMAIN}`) && PathPrefix(`/terminal/ws`)
-      - traefik.http.routers.terminal-ws.entrypoints=websecure
-      - traefik.http.routers.terminal-ws.tls=true
-      - traefik.http.routers.terminal-ws.tls.certresolver=letsencrypt
-      - traefik.http.routers.terminal-ws.priority=15
-      - traefik.http.services.terminal-ws.loadbalancer.server.port=7681
-      
-      # Strip prefix and add headers for WebSocket
-      - traefik.http.middlewares.terminal-ws-strip.stripprefix.prefixes=/terminal/ws
-      - traefik.http.middlewares.terminal-ws-headers.headers.customrequestheaders.X-Forwarded-Proto=https
-      - traefik.http.routers.terminal-ws.middlewares=terminal-ws-strip,terminal-ws-headers
-
-networks:
-  traefik-network:
-    external: true

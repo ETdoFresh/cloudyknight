@@ -24,13 +24,7 @@ services:
       # Mount the host's /workspaces directory to container's /workspaces
       - /workspaces:/workspaces:rshared
       - rclone_cache:/root/.cache/rclone
-    networks:
-      - traefik-network
     restart: unless-stopped
 
 volumes:
   rclone_cache:
-
-networks:
-  traefik-network:
-    external: true

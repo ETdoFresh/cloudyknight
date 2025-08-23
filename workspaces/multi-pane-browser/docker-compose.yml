@@ -10,29 +10,4 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_HOST=0.0.0.0
-    networks:
-      - traefik-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-network
-      
-      # Main router
-      - traefik.http.routers.multi-pane-browser.rule=Host(`${DOMAIN}`) && PathPrefix(`/multi-pane-browser`)
-      - traefik.http.routers.multi-pane-browser.entrypoints=websecure
-      - traefik.http.routers.multi-pane-browser.tls=true
-      - traefik.http.routers.multi-pane-browser.tls.certresolver=letsencrypt
-      - traefik.http.routers.multi-pane-browser.priority=10
-      - traefik.http.services.multi-pane-browser.loadbalancer.server.port=5173
-      
-      # Trailing slash redirect
-      - traefik.http.middlewares.multi-pane-browser-redirect.redirectregex.regex=^https?://([^/]+)/multi-pane-browser$$
-      - traefik.http.middlewares.multi-pane-browser-redirect.redirectregex.replacement=https://$$1/multi-pane-browser/
-      - traefik.http.middlewares.multi-pane-browser-redirect.redirectregex.permanent=true
-      
-      # Apply middleware
-      - traefik.http.routers.multi-pane-browser.middlewares=multi-pane-browser-redirect
-
-networks:
-  traefik-network:
-    external: true

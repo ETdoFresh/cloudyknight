@@ -11,29 +11,4 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_HOST=0.0.0.0
-    networks:
-      - traefik-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-network
-      
-      # Clock router - serves the clock workspace
-      - traefik.http.routers.clock.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`) && PathPrefix(`/clock`)
-      - traefik.http.routers.clock.entrypoints=websecure
-      - traefik.http.routers.clock.tls=true
-      - traefik.http.routers.clock.tls.certresolver=letsencrypt
-      - traefik.http.routers.clock.priority=10
-      - traefik.http.services.clock.loadbalancer.server.port=5173
-      
-      # Redirect /clock to /clock/ (add trailing slash)
-      - traefik.http.middlewares.clock-redirect.redirectregex.regex=^https?://([^/]+)/clock$$
-      - traefik.http.middlewares.clock-redirect.redirectregex.replacement=https://$$1/clock/
-      - traefik.http.middlewares.clock-redirect.redirectregex.permanent=true
-      
-      # Apply only redirect middleware (no prefix stripping since Vite base is /clock/)
-      - traefik.http.routers.clock.middlewares=clock-redirect
-
-networks:
-  traefik-network:
-    external: true

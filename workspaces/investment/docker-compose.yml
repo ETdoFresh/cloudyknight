@@ -11,29 +11,4 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_HOST=0.0.0.0
-    networks:
-      - traefik-network
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-network
-      
-      # Investment router - serves the investment workspace
-      - traefik.http.routers.investment.rule=Host(`${DOMAIN:-workspaces.etdofresh.com}`) && PathPrefix(`/investment`)
-      - traefik.http.routers.investment.entrypoints=websecure
-      - traefik.http.routers.investment.tls=true
-      - traefik.http.routers.investment.tls.certresolver=letsencrypt
-      - traefik.http.routers.investment.priority=10
-      - traefik.http.services.investment.loadbalancer.server.port=5173
-      
-      # Redirect /investment to /investment/ (add trailing slash)
-      - traefik.http.middlewares.investment-redirect.redirectregex.regex=^https?://([^/]+)/investment$$
-      - traefik.http.middlewares.investment-redirect.redirectregex.replacement=https://$$1/investment/
-      - traefik.http.middlewares.investment-redirect.redirectregex.permanent=true
-      
-      # Apply only redirect middleware (no prefix stripping since Vite base is /investment/)
-      - traefik.http.routers.investment.middlewares=investment-redirect
-
-networks:
-  traefik-network:
-    external: true
