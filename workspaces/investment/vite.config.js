@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/',
+  base: '/investment/',
   server: {
     port: 5173,
     host: '0.0.0.0',
@@ -9,7 +9,7 @@ export default defineConfig({
       clientPort: 443,
       protocol: 'wss',
       host: 'workspaces.etdofresh.com',
-      path: '/@vite'
+      path: '/investment/@vite'
     },
     watch: {
       usePolling: true,

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/',
+  base: '/file-browser/',  // MUST match the URL subpath
   server: {
     host: '0.0.0.0',
     port: 5173,
@@ -9,7 +9,7 @@ export default defineConfig({
       clientPort: 443,
       protocol: 'wss',
       host: 'workspaces.etdofresh.com',
-      path: '/@vite'  // WebSocket path for HMR
+      path: '/file-browser/@vite'  // WebSocket path for HMR
     },
     watch: {
       usePolling: true,  // Required for Docker
