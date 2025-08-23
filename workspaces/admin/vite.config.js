@@ -14,8 +14,14 @@ export default defineConfig({
     watch: {
       usePolling: true,
       interval: 1000
-    }
+    },
+    // Allow requests from these hosts
+    allowedHosts: [
+      'localhost',
+      'admin',
+      'workspaces.etdofresh.com',
+      '.etdofresh.com'
+    ]
   },
-  // Remove appType: 'mpa' to use default SPA behavior
-  // This will serve index.html properly for the admin panel
+  appType: 'mpa', // Multi-page app mode - don't serve index.html for all routes
 });
