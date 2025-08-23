@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/multi-pane-browser/',
+  base: '/',
   server: {
     host: '0.0.0.0',
     port: 5173,
@@ -9,7 +9,7 @@ export default defineConfig({
       clientPort: 443,
       protocol: 'wss',
       host: 'workspaces.etdofresh.com',
-      path: '/multi-pane-browser/@vite'
+      path: '/@vite'
     },
     watch: {
       usePolling: true,
