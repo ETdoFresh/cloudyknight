@@ -774,6 +774,37 @@ router.post('/workspaces/:slug/execute', async (req, res) => {
     }
 });
 
+// Fix database constraints endpoint (REMOVE IN PRODUCTION AFTER FIX!)
+router.post('/fix-constraints', async (req, res) => {
+    try {
+        console.log('Fixing database constraints...');
+        
+        // Drop and recreate the status constraint
+        await pool.query('ALTER TABLE workspaces DROP CONSTRAINT IF EXISTS workspaces_status_check');
+        await pool.query(`
+            ALTER TABLE workspaces ADD CONSTRAINT workspaces_status_check 
+            CHECK (status IN ('active', 'inactive', 'coming-soon', 'hidden'))
+        `);
+        
+        // Update any 'inactive' statuses to 'hidden'
+        const updateResult = await pool.query(`
+            UPDATE workspaces 
+            SET status = 'hidden' 
+            WHERE status = 'inactive'
+            RETURNING slug, name
+        `);
+        
+        res.json({ 
+            message: 'Constraints fixed successfully',
+            updated: updateResult.rowCount,
+            updatedWorkspaces: updateResult.rows
+        });
+    } catch (error) {
+        console.error('Fix constraints error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Database setup endpoint (REMOVE IN PRODUCTION AFTER SETUP!)
 router.post('/setup-database', async (req, res) => {
     try {
