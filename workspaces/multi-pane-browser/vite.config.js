@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/multi-pane-browser/',
+  base: '/multi-pane-browser',
   server: {
     host: '0.0.0.0',
     port: 5173,

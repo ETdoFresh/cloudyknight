@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/file-editor/',
+  base: '/file-editor',
   server: {
     host: '0.0.0.0',
     port: 5173,

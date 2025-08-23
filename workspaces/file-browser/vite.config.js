@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/file-browser/',  // MUST match the URL subpath
+  base: '/file-browser',  // MUST match the URL subpath
   server: {
     host: '0.0.0.0',
     port: 5173,
