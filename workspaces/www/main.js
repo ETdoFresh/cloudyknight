@@ -60,7 +60,7 @@ class WorkspaceManager {
     createWorkspaceCard(workspace, index) {
         const isActive = workspace.status === 'active';
         const card = document.createElement('a');
-        card.href = `/${workspace.slug}`;
+        card.href = `/${workspace.slug}/`;
         card.className = `workspace-card${!isActive ? ' coming-soon' : ''}`;
         card.style.setProperty('--card-index', index);
 
@@ -86,7 +86,8 @@ class WorkspaceManager {
         // Build valid paths from loaded workspaces
         const validPaths = ['/'];
         this.workspaces.forEach(workspace => {
-            validPaths.push(`/${workspace.slug}`);
+            validPaths.push(`/${workspace.slug}/`);
+            validPaths.push(`/${workspace.slug}`); // Also accept without trailing slash
         });
 
         // Add any additional static routes
