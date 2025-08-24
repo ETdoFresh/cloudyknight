@@ -26,25 +26,14 @@ const WORKSPACES_ROOT = '/workspaces';
 
 // Database configuration
 const getDbConfig = () => {
-    if (process.env.NODE_ENV === 'production') {
-        // Production - using Dokploy container
-        return {
-            host: 'workspaces-postgresql-j6qubz',
-            port: 5432,
-            database: 'postgres',
-            user: 'postgres',
-            password: 'cunoj2awh6a6trsi'
-        };
-    } else {
-        // Local development - using EHUB2023
-        return {
-            host: process.env.DB_HOST || 'EHUB2023',
-            port: parseInt(process.env.DB_PORT || '5432'),
-            database: process.env.DB_NAME || 'postgres',
-            user: process.env.DB_USER || 'postgres',
-            password: process.env.DB_PASSWORD || 'cunoj2awh6a6trsi'
-        };
-    }
+    // Use environment variables for all database settings
+    return {
+        host: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT || '5432'),
+        database: process.env.DB_NAME || 'postgres',
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD
+    };
 };
 
 // Create PostgreSQL pool
